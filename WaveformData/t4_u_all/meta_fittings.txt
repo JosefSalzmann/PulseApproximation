@@ -1,0 +1,256 @@
+output_left_steepness=
+171553.53274842276 +
+-48.37115378410516*input_left_steepness^1 +
+309.8566504949873*input_left_steepness^2 +
+-413.28731779180634*input_left_steepness^3 +
+171.57645456039333*input_left_steepness^4 +
+-11.659099493161765*input_left_curvature_left^1 +
+6.625336529883278*input_left_curvature_left^2 +
+-1.5217689011640947*input_left_curvature_left^3 +
+0.11863798246900657*input_left_curvature_left^4 +
+-130074.37178740409*input_left_curvature_right^1 +
+36894.62920841892*input_left_curvature_right^2 +
+-4640.713888753856*input_left_curvature_right^3 +
+218.38623276669233*input_left_curvature_right^4 +
+89.17885640994405*input_right_steepness^1 +
+137.84593806618602*input_right_steepness^2 +
+76.92503643216632*input_right_steepness^3 +
+10.561045833860032*input_right_steepness^4 +
+-1.578067841771122*input_pulse_length^1 +
+0.3408926894253138*input_pulse_length^2 +
+-0.03018258567571678*input_pulse_length^3 +
+0.0009523447551867141*input_pulse_length^4 +
+0.25010067232550814*input_right_curvature_left^1 +
+0.04976374996996234*input_right_curvature_left^2 +
+-0.0328471834674387*input_right_curvature_left^3 +
+0.0031459309085968804*input_right_curvature_left^4 +
+58.34527923379272*input_right_curvature_right^1 +
+-20.605642452147496*input_right_curvature_right^2 +
+3.1876950589656663*input_right_curvature_right^3 +
+-0.18282514497825766*input_right_curvature_right^4 +
+
+output_left_shift=
+70452.10699785301 +
+1436.9488774132342*input_left_steepness^1 +
+11.52951629420313*input_left_steepness^2 +
+-2001.7448614072625*input_left_steepness^3 +
+1170.8910866362216*input_left_steepness^4 +
+-25.405471330459932*input_left_curvature_left^1 +
+15.474706982179047*input_left_curvature_left^2 +
+-3.7617354668155984*input_left_curvature_left^3 +
+0.3059059334331466*input_left_curvature_left^4 +
+-53849.99347413641*input_left_curvature_right^1 +
+15270.26162716269*input_left_curvature_right^2 +
+-1920.068193865184*input_left_curvature_right^3 +
+90.30699295715324*input_left_curvature_right^4 +
+1193.89005514934*input_right_steepness^1 +
+1487.1982232155956*input_right_steepness^2 +
+714.99065805224*input_right_steepness^3 +
+92.52762338027664*input_right_steepness^4 +
+0.4962576490332226*input_pulse_length^1 +
+0.3429189212534276*input_pulse_length^2 +
+-0.04258866305769234*input_pulse_length^3 +
+0.0015908633656807275*input_pulse_length^4 +
+-0.6404051161452395*input_right_curvature_left^1 +
+0.9683207523439923*input_right_curvature_left^2 +
+-0.2894595538499602*input_right_curvature_left^3 +
+0.023840872731423574*input_right_curvature_left^4 +
+328.4590577281084*input_right_curvature_right^1 +
+-112.11851497496484*input_right_curvature_right^2 +
+16.838442612388608*input_right_curvature_right^3 +
+-0.9385672099648308*input_right_curvature_right^4 +
+
+output_left_curvature_left=
+535417.706988038 +
+-19477.76668350454*input_left_steepness^1 +
+23370.783869126626*input_left_steepness^2 +
+-9748.344843367173*input_left_steepness^3 +
+375.1703668625979*input_left_steepness^4 +
+92.89499251002121*input_left_curvature_left^1 +
+-58.09582503353532*input_left_curvature_left^2 +
+14.3021632669334*input_left_curvature_left^3 +
+-1.1681334645105612*input_left_curvature_left^4 +
+-402657.92562140524*input_left_curvature_right^1 +
+114202.03194419293*input_left_curvature_right^2 +
+-14365.468958772877*input_left_curvature_right^3 +
+676.186619228343*input_left_curvature_right^4 +
+-7796.561641846391*input_right_steepness^1 +
+-9239.827120053875*input_right_steepness^2 +
+-4283.6940219015*input_right_steepness^3 +
+-545.8074161812546*input_right_steepness^4 +
+13.191492878079256*input_pulse_length^1 +
+-3.405265093228973*input_pulse_length^2 +
+0.33895355183730264*input_pulse_length^3 +
+-0.011761635200916255*input_pulse_length^4 +
+6.353628576202773*input_right_curvature_left^1 +
+-5.315914523315333*input_right_curvature_left^2 +
+1.3615246556772644*input_right_curvature_left^3 +
+-0.10516184730044313*input_right_curvature_left^4 +
+-975.3954532019404*input_right_curvature_right^1 +
+339.2707131826224*input_right_curvature_right^2 +
+-51.86139005010329*input_right_curvature_right^3 +
+2.9431449882945393*input_right_curvature_right^4 +
+
+output_left_curvature_right=
+1265921.0124548401 +
+-15926.655019671862*input_left_steepness^1 +
+19370.001749930052*input_left_steepness^2 +
+-7873.619036308905*input_left_steepness^3 +
+75.1676582877538*input_left_steepness^4 +
+35.48466018233984*input_left_curvature_left^1 +
+-31.314930397658795*input_left_curvature_left^2 +
+9.059545516634529*input_left_curvature_left^3 +
+-0.8080166206317727*input_left_curvature_left^4 +
+-959566.7090663752*input_left_curvature_right^1 +
+272158.92367439275*input_left_curvature_right^2 +
+-34233.19798483426*input_left_curvature_right^3 +
+1611.1346422028676*input_left_curvature_right^4 +
+-15897.416481739205*input_right_steepness^1 +
+-18844.33437403273*input_right_steepness^2 +
+-8713.599448703486*input_right_steepness^3 +
+-1108.6713597339262*input_right_steepness^4 +
+12.487652441630848*input_pulse_length^1 +
+-3.0433533297492517*input_pulse_length^2 +
+0.2794699212547696*input_pulse_length^3 +
+-0.008742974300934542*input_pulse_length^4 +
+11.48754134133061*input_right_curvature_left^1 +
+-7.733505684568416*input_right_curvature_left^2 +
+1.8826549860236963*input_right_curvature_left^3 +
+-0.14308341558710194*input_right_curvature_left^4 +
+-325.8899266285128*input_right_curvature_right^1 +
+141.43890741062225*input_right_curvature_right^2 +
+-25.276677912702812*input_right_curvature_right^3 +
+1.6086329591428121*input_right_curvature_right^4 +
+
+output_right_steepness=
+-32454.98869401195 +
+49.245656524529934*input_left_steepness^1 +
+-1.3263853273820518*input_left_steepness^2 +
+-32.35325979564038*input_left_steepness^3 +
+7.201432036516304*input_left_steepness^4 +
+-4.76764711688198*input_left_curvature_left^1 +
+2.984326130137839*input_left_curvature_left^2 +
+-0.7792979486709026*input_left_curvature_left^3 +
+0.06677929044604877*input_left_curvature_left^4 +
+24720.60935465956*input_left_curvature_right^1 +
+-7015.220435099633*input_left_curvature_right^2 +
+882.9236899000895*input_left_curvature_right^3 +
+-41.58127447262687*input_left_curvature_right^4 +
+666.0726983236335*input_right_steepness^1 +
+738.3622468664604*input_right_steepness^2 +
+319.96129367455984*input_right_steepness^3 +
+39.46402613995801*input_right_steepness^4 +
+0.23931928025888755*input_pulse_length^1 +
+-0.22514115798364817*input_pulse_length^2 +
+0.03174621328000999*input_pulse_length^3 +
+-0.0013343954849506798*input_pulse_length^4 +
+-1.6796438967358374*input_right_curvature_left^1 +
+0.8024184939445552*input_right_curvature_left^2 +
+-0.14011119389244392*input_right_curvature_left^3 +
+0.008461513276049057*input_right_curvature_left^4 +
+43.49763225685238*input_right_curvature_right^1 +
+-16.05786038593725*input_right_curvature_right^2 +
+2.618306516284121*input_right_curvature_right^3 +
+-0.15793148041736466*input_right_curvature_right^4 +
+
+output_right_shift=
+371599.47807788977 +
+218.0882244115065*input_left_steepness^1 +
+-0.317056710081055*input_left_steepness^2 +
+-251.07476189401825*input_left_steepness^3 +
+133.15235312554427*input_left_steepness^4 +
+-12.785791184755*input_left_curvature_left^1 +
+6.848261677452128*input_left_curvature_left^2 +
+-1.5120553985733307*input_left_curvature_left^3 +
+0.11494848643530549*input_left_curvature_left^4 +
+-281774.8490638683*input_left_curvature_right^1 +
+79920.02112360865*input_left_curvature_right^2 +
+-10052.399132989569*input_left_curvature_right^3 +
+473.05903827618346*input_left_curvature_right^4 +
+212.05841129054608*input_right_steepness^1 +
+267.5995698645131*input_right_steepness^2 +
+129.82764671084257*input_right_steepness^3 +
+16.878243230139535*input_right_steepness^4 +
+1.8151387824700893*input_pulse_length^1 +
+-0.485129757127971*input_pulse_length^2 +
+0.052077597631903616*input_pulse_length^3 +
+-0.001963391525362598*input_pulse_length^4 +
+-0.7784762625697254*input_right_curvature_left^1 +
+0.3681331411445398*input_right_curvature_left^2 +
+-0.06353733327972258*input_right_curvature_left^3 +
+0.0036989703645076647*input_right_curvature_left^4 +
+126.37785756819358*input_right_curvature_right^1 +
+-42.679382795543304*input_right_curvature_right^2 +
+6.326300422483888*input_right_curvature_right^3 +
+-0.3475754227617776*input_right_curvature_right^4 +
+
+output_right_curvature_left=
+1243001.6862633047 +
+-85.94217451702427*input_left_steepness^1 +
+551.7989862738478*input_left_steepness^2 +
+-385.8597498226307*input_left_steepness^3 +
+3.7413638389348622*input_left_steepness^4 +
+-50.7205047553649*input_left_curvature_left^1 +
+27.189443599830007*input_left_curvature_left^2 +
+-6.30145224909463*input_left_curvature_left^3 +
+0.5028866495604828*input_left_curvature_left^4 +
+-942715.63250312*input_left_curvature_right^1 +
+267360.0626501004*input_left_curvature_right^2 +
+-33625.72965274864*input_left_curvature_right^3 +
+1582.2524367344158*input_left_curvature_right^4 +
+-1099.2987864830648*input_right_steepness^1 +
+-1346.8984741671345*input_right_steepness^2 +
+-647.5480346639639*input_right_steepness^3 +
+-83.89025550821873*input_right_steepness^4 +
+1.3946480462564597*input_pulse_length^1 +
+-0.770266843275641*input_pulse_length^2 +
+0.10001977805099085*input_pulse_length^3 +
+-0.004051737313297264*input_pulse_length^4 +
+0.42581618988018666*input_right_curvature_left^1 +
+-0.5331996614114327*input_right_curvature_left^2 +
+0.180760646154051*input_right_curvature_left^3 +
+-0.0159527501095346*input_right_curvature_left^4 +
+478.5513287690788*input_right_curvature_right^1 +
+-164.19513544448841*input_right_curvature_right^2 +
+24.961360039980782*input_right_curvature_right^3 +
+-1.4126867899177131*input_right_curvature_right^4 +
+
+output_right_curvature_right=
+-2129113.40947954 +
+-19695.613957116366*input_left_steepness^1 +
+23144.706819694118*input_left_steepness^2 +
+-9038.08835402436*input_left_steepness^3 +
+-14.171837690776599*input_left_steepness^4 +
+67.56519885032868*input_left_curvature_left^1 +
+-48.83521619133223*input_left_curvature_left^2 +
+13.238271761927823*input_left_curvature_left^3 +
+-1.151190927934054*input_left_curvature_left^4 +
+1619155.6336424232*input_left_curvature_right^1 +
+-459217.8361309236*input_left_curvature_right^2 +
+57757.55727150693*input_left_curvature_right^3 +
+-2717.8379305982885*input_left_curvature_right^4 +
+-655.9985621734278*input_right_steepness^1 +
+-1380.7356700423684*input_right_steepness^2 +
+-893.2273503308985*input_right_steepness^3 +
+-128.52671398401515*input_right_steepness^4 +
+5.793032794264102*input_pulse_length^1 +
+-3.3142525543735153*input_pulse_length^2 +
+0.4116606836203335*input_pulse_length^3 +
+-0.01575424088121025*input_pulse_length^4 +
+1.1172686266722236*input_right_curvature_left^1 +
+-4.033882262322914*input_right_curvature_left^2 +
+1.4761804552856803*input_right_curvature_left^3 +
+-0.13147862285855016*input_right_curvature_left^4 +
+-1619.405899643639*input_right_curvature_right^1 +
+548.6981182115823*input_right_curvature_right^2 +
+-81.83154154309803*input_right_curvature_right^3 +
+4.530106451849178*input_right_curvature_right^4 +
+
+output_left_steepness RMSE: 0.025225320726372086
+output_left_shift RMSE: 0.06533804936748025
+output_left_curvature_left RMSE: 0.27188731975553515
+output_left_curvature_right RMSE: 0.30168782363992935
+output_right_steepness RMSE: 0.021866675560139257
+output_right_shift RMSE: 0.04416616175941025
+output_right_curvature_left RMSE: 0.10485611313662911
+output_right_curvature_right RMSE: 0.32778204236429087

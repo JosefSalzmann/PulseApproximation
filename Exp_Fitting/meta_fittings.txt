@@ -1,0 +1,64 @@
+output_left_steepness=
+911.0294368489125 +
+-964.028319268388*input_pulse_length^1 +
+680.4669728321629*input_pulse_length^2 +
+-161.90923029986254*input_pulse_length^3 +
+1.555346266967398*input_pulse_length^4 +
+-0.9095377942827706*input_left_shift^1 +
+0.25676399016739104*input_left_shift^2 +
+-0.026041041137679976*input_left_shift^3 +
+0.0009013146830945218*input_left_shift^4 +
+1878.7916197014765*input_right_steepness^1 +
+2726.9563887081167*input_right_steepness^2 +
+1679.9766294299095*input_right_steepness^3 +
+374.49448618655015*input_right_steepness^4 +
+
+output_left_shift=
+-5633.641912966238 +
+342.24628293721486*input_pulse_length^1 +
+-262.09504917317315*input_pulse_length^2 +
+66.28921350815445*input_pulse_length^3 +
+-0.6383984489146046*input_pulse_length^4 +
+1.905048285257635*input_left_shift^1 +
+-0.40362063013234717*input_left_shift^2 +
+0.03593742664642608*input_left_shift^3 +
+-0.0011581485025918847*input_left_shift^4 +
+-17953.09065352413*input_right_steepness^1 +
+-21985.805524504332*input_right_steepness^2 +
+-11960.495104111853*input_right_steepness^3 +
+-2437.472129800017*input_right_steepness^4 +
+
+output_right_steepness=
+5708.8919152886065 +
+-32.40215204764765*input_pulse_length^1 +
+-2.3570934451879215*input_pulse_length^2 +
+5.124918288101572*input_pulse_length^3 +
+-0.05109642117356901*input_pulse_length^4 +
+0.5552583588157286*input_left_shift^1 +
+-0.0412537689666351*input_left_shift^2 +
+-0.0005254237998664449*input_left_shift^3 +
+0.0001078425376967069*input_left_shift^4 +
+18618.516642280127*input_right_steepness^1 +
+22833.502510303053*input_right_steepness^2 +
+12415.47038166705*input_right_steepness^3 +
+2526.991823451463*input_right_steepness^4 +
+
+output_right_shift=
+-4225.871048353133 +
+-218.3897673310241*input_pulse_length^1 +
+141.23571608068193*input_pulse_length^2 +
+-31.060342253809814*input_pulse_length^3 +
+0.297333492451136*input_pulse_length^4 +
+3.7242138812637307*input_left_shift^1 +
+-0.5393506463281202*input_left_shift^2 +
+0.04666299327240908*input_left_shift^3 +
+-0.0014922318909153522*input_left_shift^4 +
+-13844.161786382545*input_right_steepness^1 +
+-16645.17265067236*input_right_steepness^2 +
+-8948.159441562333*input_right_steepness^3 +
+-1813.5258184800089*input_right_steepness^4 +
+
+output_left_steepness RMSE: 0.0017000840574452239
+output_left_shift RMSE: 0.0021914975601744343
+output_right_steepness RMSE: 0.002699294609534709
+output_right_shift RMSE: 0.004560038217850221

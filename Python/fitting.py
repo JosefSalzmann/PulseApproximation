@@ -13,7 +13,6 @@ Voltage = 1.2
 num_points = 500
 folderpath = "../WaveformData/t4_u_all/"
 
-Lin_approx_order = 3
 
 def lowside_pulse(t, args): 
 	args_rising = args[0:len(sig.input_initial)/2]
@@ -61,10 +60,9 @@ def get_params(visualize, path, input_init, output_init):
 			output_sigma[i] = 0.5
 	'''	
 
-	input_params = optimize.curve_fit(lowside_pulse_wr, data[0], data[lowside_index], input_init, sigma = input_sigma, bounds = (sig.input_lower_bound, sig.input_upper_bound), maxfev=3000)
-	output_params = optimize.curve_fit(highside_pulse_wr, data[0], data[highside_index], output_init, sigma = output_sigma, bounds = (sig.output_lower_bound, sig.output_upper_bound), maxfev=3000)
+	input_params = optimize.curve_fit(lowside_pulse_wr, data[0], data[lowside_index], input_init, sigma = input_sigma, bounds = (sig.input_lower_bound, sig.input_upper_bound), maxfev=5000)
+	output_params = optimize.curve_fit(highside_pulse_wr, data[0], data[highside_index], output_init, sigma = output_sigma, bounds = (sig.output_lower_bound, sig.output_upper_bound), maxfev=5000)
 	
-
 	input_fitting = [0]*len(data[0])
 	output_fitting = [0]*len(data[0])
 	
@@ -83,10 +81,11 @@ def get_params(visualize, path, input_init, output_init):
 			input_fitting[i] = lowside_pulse(data[0][i],input_params[0])
 			output_fitting[i] = highside_pulse(data[0][i],output_params[0])
 			
-		plt.plot(data[0],data[lowside_index],'r-')
-		plt.plot(data[0],input_fitting,'r--')
-		plt.plot(data[0],data[highside_index],'g-')		
-		plt.plot(data[0],output_fitting,'g--')	
+		linew = 1
+		plt.plot(data[0],data[lowside_index],'r-', linewidth=linew)
+		plt.plot(data[0],input_fitting,'r--', linewidth=linew)
+		plt.plot(data[0],data[highside_index],'g-', linewidth=linew)		
+		plt.plot(data[0],output_fitting,'g--', linewidth=linew)	
 		
 		file_name = path.split("/")[len(path.split("/"))-1]
 		title = file[:len(file)-4]
@@ -125,8 +124,8 @@ for file in filenames:
 	if file.split(".")[1] == "dat" and count < 200:
 		res = get_params(True, folderpath + "/" + file, input_init, output_init)
 		
-		#input_init = res[:len(sig.input_initial)]
-		#output_init = res[len(sig.input_initial):len(sig.input_initial)*2]
+		input_init = res[:len(sig.input_initial)]
+		output_init = res[len(sig.input_initial):len(sig.input_initial)*2]
 		
 		res = np.round_(np.array(res),decimals = 7)
 		np.set_printoptions(linewidth =300,suppress=True)

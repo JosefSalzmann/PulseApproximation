@@ -148,11 +148,11 @@ for i in range(0, len(dat_file_content)):
 	plt.clf()
 	fig = plt.gcf()
 	fig.set_size_inches(8, 6)
-	plt.plot(dat_file_content[i].time, dat_file_content[i].input_pulse,'r-')
-	#plt.plot(data[0],input_fitting,'r-')
-	plt.plot(dat_file_content[i].time, dat_file_content[i].output_pulse,'g-')		
-	#plt.plot(data[0],output_fitting,'g--')	
-	plt.plot(dat_file_content[i].time,meta_output_fitting,'b--')	
+	
+	linew = 1;
+	plt.plot(dat_file_content[i].time, dat_file_content[i].input_pulse,'r-', linewidth=linew)
+	plt.plot(dat_file_content[i].time, dat_file_content[i].output_pulse,'g-', linewidth=linew)		
+	plt.plot(dat_file_content[i].time,meta_output_fitting,'b--', linewidth=linew)	
 	plt.text(0, Voltage/4, "Out RMSE: " + str(round(aux.calc_rms_error_data(dat_file_content[i].output_pulse,meta_output_fitting),5)),family="monospace")
 	plt.title(dat_file_content[i].file_name + " Meta fitting")
 	plt.legend(["Input","Output", "Meta Output fitting"], loc = 'center left')

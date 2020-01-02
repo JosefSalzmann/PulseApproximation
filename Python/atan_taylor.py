@@ -4,23 +4,28 @@ tan_taylor_coeffs = [	1.000000000000000, 0, 0.333333333333333, 0, 0.133333333333
 						0, 0.053968253968254, 0, 0.021869488536155, 0, 0.008863235529902,
 						0, 0.003592128036572, 0, 0.001455834387051, 0, 0.000590027440946 ]
 						
+tan_taylor_coeffs_odd = [	1.000000000000000, 0.333333333333333, 0.133333333333333, 
+						0.053968253968254, 0.021869488536155, 0.008863235529902,
+						0.003592128036572, 0.001455834387051, 0.000590027440946 ]
+						
 def taylor_approx(x,a):
 	sum = x
-	if a < len(tan_taylor_coeffs):
-		for i in range(1,len(tan_taylor_coeffs)):
-			sum = sum + (tan_taylor_coeffs[i]*x**(i+1))*((np.arctan(taylor_approx(a-i,50))/np.pi)+0.5)     #1/(1+np.exp(1.8*(i-a)))    #  
+	if a < len(tan_taylor_coeffs_odd):
+		for i in range(1,len(tan_taylor_coeffs_odd)):
+			sum = sum + (tan_taylor_coeffs_odd[i]*x**(2*i+1))*((np.arctan(taylor_approx(a-i,50))/np.pi)+0.5)     #1/(1+np.exp(1.8*(i-a)))    #  
 	else:
-		for i in range(1,len(tan_taylor_coeffs)):
-			sum = sum + tan_taylor_coeffs[i]*x**(i+1)
+		for i in range(1,len(tan_taylor_coeffs_odd)):
+			sum = sum + tan_taylor_coeffs_odd[i]*x**(2*i+1)
 	return sum	
 
 def sigmoid(t, args):
 	return (0.5*np.arctan(taylor_approx(args[0]*(t*10**10-args[1]), args[2]))/(np.pi/2)+0.5)*((np.arctan(1000*args[0]*(t*10**10-args[1]))/np.pi)+0.5)+(0.5*np.arctan(taylor_approx(args[0]*(t*10**10-args[1]), args[3]))/(np.pi/2)+0.5)*((np.arctan(-1000*args[0]*(t*10**10-args[1]))/np.pi)+0.5)		  
 	
 
-input_initial = 	[0.8,  10, 3, 3,  -0.9, 12, 3, 3]
-input_lower_bound = [0.6,  0,  0.5, 0.5, -2, 0, 0.5, 0.5]
-input_upper_bound = [1,25, 3,10,  -0.6,  25, 10, 4]
+input_initial = 	[0.7,  11.3, 0.001, 1.5,  -0.7, 11.7, 1.5, 0.001]
+#input_lower_bound = [0.6,  0,  0.5, 0.5, -2, 0, 0.5, 0.5]
+input_lower_bound = [0.6,  0,  0, 0, -2, 0, 0, 0]
+input_upper_bound = [1,27, 1,6,  -0.6,  27, 6, 2]
 
 parameter_names = ['left_steepness', 'left_shift', 'left_curvature_left', 'left_curvature_right', 'right_steepness', 'right_shift', 'right_curvature_left', 'right_curvature_right']
 

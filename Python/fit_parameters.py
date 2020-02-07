@@ -7,17 +7,20 @@ from mpl_toolkits import mplot3d
 import classes as cl
 
 
-import atan_taylor as sig
+import atan_const_curv as sig
 Voltage = 1.2
 num_points = 500
 folderpath = "../WaveformData/t4_u_all/"
 
 Lin_approx_order = 4
 
+def lowside_pulse(t, args): 
+	args_rising = args[0:len(sig.input_initial)/2]
+	args_falling = args[(len(sig.input_initial)/2):len(sig.input_initial)]
+	return (Voltage*(sig.sigmoid(t, args_rising) + sig.sigmoid(t, args_falling)) - Voltage)
+
 def highside_pulse(t, args): 
-	args_rising = args[(len(sig.input_initial)/2):len(sig.input_initial)]
-	args_falling = args[0:len(sig.input_initial)/2]
-	return Voltage*(sig.sigmoid(t, args_rising) + sig.sigmoid(t, args_falling))
+	return Voltage - lowside_pulse(t,args);
 
 
 
@@ -130,7 +133,7 @@ for i in range(0, len(sig.input_initial)):
 
 rms_errors = [0 for i in range(len(sig.input_initial))]
 for i in range(0, len(sig.input_initial)):
-	rms_errors[i] = np.sqrt(sum(fitting_sq_errors[i])/len(fitting_sq_errors[i]))
+	rms_errors[i] = np.sqrt(sum(fitting_sq_errors[i])/len(fitting_sq_errors[i]))/Voltage
 	print(names[len(sig.input_initial)-1+i] + " RMSE: " + str(rms_errors[i]))
 	fw.write(names[len(sig.input_initial)-1+i] + " RMSE: " + str(rms_errors[i]) + "\n");
 fw.close()

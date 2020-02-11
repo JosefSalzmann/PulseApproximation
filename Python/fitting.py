@@ -14,15 +14,15 @@ num_points = 500
 folderpath = "../WaveformData/t4_u_all/"
 
 
+
 def lowside_pulse(t, args): 
 	args_rising = args[0:len(sig.input_initial)/2]
 	args_falling = args[(len(sig.input_initial)/2):len(sig.input_initial)]
+	#print("fitting\n" + str(t));
 	return (Voltage*(sig.sigmoid(t, args_rising) + sig.sigmoid(t, args_falling)) - Voltage)
 
 def highside_pulse(t, args): 
-	args_rising = args[(len(sig.input_initial)/2):len(sig.input_initial)]
-	args_falling = args[0:len(sig.input_initial)/2]
-	return Voltage*(sig.sigmoid(t, args_rising) + sig.sigmoid(t, args_falling))
+	return Voltage - lowside_pulse(t,args);
 	
 def lowside_pulse_wr(t,*args): 
 	return lowside_pulse(t,args)
@@ -68,8 +68,8 @@ def get_params(visualize, path, input_init, output_init):
 	
 	inp_rising = [0]*len(data[0])
 	
-	input_rms_error = aux.calc_rms_error_func(lowside_pulse, input_params[0], data[0], data[lowside_index])
-	output_rms_error = aux.calc_rms_error_func(highside_pulse, output_params[0], data[0], data[highside_index])
+	input_rms_error = aux.calc_rms_error_func(lowside_pulse, input_params[0], data[0], data[lowside_index])/Voltage
+	output_rms_error = aux.calc_rms_error_func(highside_pulse, output_params[0], data[0], data[highside_index])/Voltage
 
 	
 	if visualize:
@@ -91,11 +91,13 @@ def get_params(visualize, path, input_init, output_init):
 		title = file[:len(file)-4]
 		plt.title(title)
 		plt.legend(["Input","Input fitting","Output","Output fitting"], loc = 'center left')
+		plt.ylabel("Voltage [V]");
+		plt.xlabel("Time [s]");
 		#plt.legend(["Input","Output","Input Rising Edge","Input Falling Edge","Output Rising Edge","Output Falling Edge", "Vdd/2"], loc = 'center left')
 		plt.text(0, Voltage/4, "In  RMSE: " + str(round(input_rms_error,5)) + "\nOut RMSE: " + str(round(output_rms_error,5)),family="monospace")
 		#plt.show()
 		imgpath = path[:len(path)-3]
-		plt.savefig(imgpath + "png")	
+		plt.savefig(imgpath + "svg")	
 	
 	input_arr_len = len(input_params[0])
 	output_arr_len = len(output_params[0])
@@ -120,12 +122,22 @@ count = 0
 input_init = sig.input_initial
 output_init = sig.output_initial
 start = timer()
+
+sum_of_error = [0]*2; # 0 = input, 1 = output
+max_error = [0]*2;
 for file in filenames:
 	if file.split(".")[1] == "dat" and count < 200:
 		res = get_params(True, folderpath + "/" + file, input_init, output_init)
 		
-		input_init = res[:len(sig.input_initial)]
-		output_init = res[len(sig.input_initial):len(sig.input_initial)*2]
+		sum_of_error[0] = sum_of_error[0] + res[len(res)-2];
+		sum_of_error[1] = sum_of_error[1] + res[len(res)-1];
+		if res[len(res)-2] > max_error[0]:
+			max_error[0] = res[len(res)-2];
+		if res[len(res)-1] > max_error[1]:
+			max_error[1] = res[len(res)-1];
+		
+		#input_init = res[:len(sig.input_initial)]
+		#output_init = res[len(sig.input_initial):len(sig.input_initial)*2]
 		
 		res = np.round_(np.array(res),decimals = 7)
 		np.set_printoptions(linewidth =300,suppress=True)
@@ -158,87 +170,13 @@ end = timer()
 for i in range(0,len(params)):
 	params[i] = params[i][:count]
 
+sum_of_error[0] = sum_of_error[0]/count;
+sum_of_error[1] = sum_of_error[1]/count;
 print(end-start)
+print("average input fitting error:" + str(round(sum_of_error[0],5)))
+print("average output fitting error:" + str(round(sum_of_error[1],5)))
+print("max input fitting error:" + str(round(max_error[0],5)))
+print("max output fitting error:" + str(round(max_error[1],5)))
 
 
 
-
-
-
-
-'''
-def meta_func(X,args):
-	ret_val = args[0]
-	arg_count = 1
-	for i in range(0, len(sig.input_initial)-1):
-		for j in range(1, Lin_approx_order+1):
-			ret_val = ret_val + args[arg_count]*(X[i]**j)
-			arg_count = arg_count + 1
-	return ret_val
-
-def meta_func_wr(X, *args):
-	return meta_func(X,args)
-	
-meta_params = [[1 for i in range(1+(len(sig.input_initial)-1)*Lin_approx_order)] for j in range(len(sig.input_initial))]
-
-for i in range(0, len(sig.input_initial)):
-	meta_params[i] = optimize.curve_fit(meta_func_wr, params[:len(sig.input_initial)-1], params[len(sig.input_initial)-1+i], meta_params[i])[0]
-	print(meta_params[i])
-	
-
-meta_fittings = [[0 for i in range(count)] for j in range(len(sig.input_initial))]
-input_params_fitting = [[0 for i in range(len(sig.input_initial)-1)] for j in range(count)]
-
-for i in range(0,count):
-	for j in range(0,len(sig.input_initial)-1):
-		input_params_fitting[i][j] = params[j][i]		
-
-for i in range(0, len(sig.input_initial)):
-	for j in range(0,count):
-		meta_fittings[i][j] = meta_func(input_params_fitting[j], meta_params[i])
-
-		
-fitting_sq_errors = [[0 for i in range(count)] for i in range(len(sig.input_initial))]
-for i in range(0, len(sig.input_initial)):
-	fitting_sq_errors[i] = np.subtract(params[len(sig.input_initial)-1+i],meta_fittings[i])**2
-
-rms_errors = [0 for i in range(len(sig.input_initial))]
-for i in range(0, len(sig.input_initial)):
-	rms_errors[i] = np.sqrt(sum(fitting_sq_errors[i])/len(fitting_sq_errors[i]))
-	print(rms_errors[i])
-	
-meta_output_params = [[0 for i in range(len(sig.input_initial))] for j in range(count)]
-for i in range(0,count):
-	for j in range(0,len(sig.input_initial)):
-		meta_output_params[i][j] = meta_fittings[j][i]
-
-print(meta_output_params[0])
-
-count = 0
-for file in filenames:
-	if file.split(".")[1] == "dat":
-		data = aux.read_file(folderpath  + file, num_points)
-		input_fitting = [0]*len(data[0])
-		output_fitting = [0]*len(data[0])
-		meta_output_fitting = [0]*len(data[0])
-		for i in range(0,len(data[0])):
-				#input_fitting[i] = lowside_pulse(data[0][i],input_params[0])
-				#output_fitting[i] = highside_pulse(data[0][i],output_params[0])
-				meta_output_fitting[i] = highside_pulse(data[0][i],meta_output_params[count])
-		
-		plt.cla()
-		plt.clf()
-		plt.plot(data[0],data[1],'r-')
-		#plt.plot(data[0],input_fitting,'r-')
-		plt.plot(data[0],data[2],'g-')		
-		#plt.plot(data[0],output_fitting,'g--')	
-		plt.plot(data[0],meta_output_fitting,'b--')	
-		
-		plt.title("Meta fitting")
-		plt.legend(["Input","Output", "Meta Output fitting"], loc = 'center left')
-		#plt.show()
-		path = folderpath + file
-		imgpath = path[:len(path)-4]
-		plt.savefig(imgpath + "_Meta_fitting.png")
-		count = count + 1
-'''

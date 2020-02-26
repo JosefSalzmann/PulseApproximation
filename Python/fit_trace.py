@@ -21,14 +21,14 @@ def compensation_terms(args):
 	return (len(args)/params_per_sig)/2-correction;
 	
 	
-def trace_simple_exp(t, args):
+def trace_sigmoids(t, args):
 	sum = 0;
 	for i in range(0,len(args)/len(sig.trace_initial)):
 		sum = sum + sig.sigmoid(t,args[len(sig.trace_initial)*i:len(sig.trace_initial)*(i+1)]);
 	return Voltage*(sum-compensation_terms(args));
 	
-def trace_simple_exp_wr(t, *args):
-	return trace_simple_exp(t, args);
+def trace_sigmoids_wr(t, *args):
+	return trace_sigmoids(t, args);
 	
 def fit_trace(time, trace, lowres_time, lowres_trace):
 	first_der = [0.0]*len(time);
@@ -92,7 +92,7 @@ def fit_trace(time, trace, lowres_time, lowres_trace):
 		upper_bound[len(sig.trace_initial)*i+sig.trace_shift] = (trace_init[len(sig.trace_initial)*i+sig.trace_shift]+trace_init[len(sig.trace_initial)*(i+1)+sig.trace_shift])/2;
 
 		
-	fitting_params = optimize.curve_fit(trace_simple_exp_wr, lowres_time, lowres_trace, trace_init, bounds = (lower_bound, upper_bound), maxfev=5000)
+	fitting_params = optimize.curve_fit(trace_sigmoids_wr, lowres_time, lowres_trace, trace_init, bounds = (lower_bound, upper_bound), maxfev=5000)
 	
 	return fitting_params;
 	
@@ -109,8 +109,8 @@ output_fitting = fit_trace(data[0], data[2], data_reduced[0], data_reduced[2]);
 approx_in = [0.0]*len(data_reduced[0]);
 approx_out = [0.0]*len(data_reduced[0]);
 for i in range(0,len(data_reduced[0])):
-	approx_in[i] = trace_simple_exp(data_reduced[0][i], input_fitting[0]);
-	approx_out[i] = trace_simple_exp(data_reduced[0][i], output_fitting[0]);
+	approx_in[i] = trace_sigmoids(data_reduced[0][i], input_fitting[0]);
+	approx_out[i] = trace_sigmoids(data_reduced[0][i], output_fitting[0]);
 	
 	
 plt.cla()
@@ -123,8 +123,8 @@ plt.plot(data[0],data[2],'g-', linewidth=linew);
 plt.plot(data_reduced[0],approx_in,'r--', linewidth=linew);
 plt.plot(data_reduced[0],approx_out,'g--', linewidth=linew);
 
-input_fitting_err = aux.calc_rms_error_func(trace_simple_exp, input_fitting[0], data_reduced[0], data_reduced[1])/Voltage;
-output_fitting_err = aux.calc_rms_error_func(trace_simple_exp, output_fitting[0], data_reduced[0], data_reduced[2])/Voltage;
+input_fitting_err = aux.calc_rms_error_func(trace_sigmoids, input_fitting[0], data_reduced[0], data_reduced[1])/Voltage;
+output_fitting_err = aux.calc_rms_error_func(trace_sigmoids, output_fitting[0], data_reduced[0], data_reduced[2])/Voltage;
 
 
 plt.text(0, Voltage/4, "In  RMSE: " + str(round(input_fitting_err,5)) + "\nOut RMSE: " + str(round(output_fitting_err,5)),family="monospace")
@@ -158,7 +158,7 @@ for i in range(0, len(input_fitting[0])/len(sig.trace_initial)):
 		write_str.append(str(round(input_fitting[0][i*len(sig.trace_initial)+j], 5)) + ",");	
 	write_str.append(str(round(input_fitting[0][i*len(sig.trace_initial) + len(sig.trace_initial)-1],5)));	
 	write_str.append("\n");
-write_str.append("Input compensations terms," + str(compensation_terms(input_fitting[0])) + "\n");	
+write_str.append("Input compensation terms," + str(compensation_terms(input_fitting[0])) + "\n");	
 	
 write_str.append("Output parameters\n");
 write_str.append(''.join(parameter_string));
@@ -167,14 +167,15 @@ for i in range(0, len(output_fitting[0])/len(sig.trace_initial)):
 		write_str.append(str(round(output_fitting[0][i*len(sig.trace_initial)+j], 5)) + ",");	
 	write_str.append(str(round(output_fitting[0][i*len(sig.trace_initial) + len(sig.trace_initial)-1],5)));	
 	write_str.append("\n");
-write_str.append("Output compensations terms," + str(compensation_terms(output_fitting[0])) + "\n");		
+write_str.append("Output compensations term," + str(compensation_terms(output_fitting[0])) + "\n");		
 write_str.append("Input RMSE," + str(round(input_fitting_err,7)) + "\n");		
 write_str.append("Output RMSE," + str(round(output_fitting_err,7)) + "\n");		
 	
 	
-#print(''.join(write_str));	
 fw.write(''.join(write_str))
 fw.close();
+
+print(''.join(write_str));
 
 
 

@@ -7,12 +7,12 @@ from mpl_toolkits import mplot3d
 import classes as cl
 
 
-import atan_const_curv as sig
+import atan_taylor as sig
 Voltage = 1.2
 num_points = 500
 folderpath = "../WaveformData/t4_u_all/"
 
-Lin_approx_order = 4
+Lin_approx_order = 1
 
 def lowside_pulse(t, args): 
 	args_rising = args[0:len(sig.input_initial)/2]

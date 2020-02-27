@@ -5,10 +5,11 @@ from scipy import optimize
 from os import walk
 from mpl_toolkits import mplot3d
 from timeit import default_timer as timer
-
-
 import importlib
-sig = importlib.import_module("atan_taylor", package=None)
+
+
+sig_name = "exp"
+sig = importlib.import_module(sig_name, package=None)
 Voltage = 1.2
 num_points = 500
 folderpath = "../WaveformData/t4_u_all/"
@@ -18,7 +19,6 @@ folderpath = "../WaveformData/t4_u_all/"
 def lowside_pulse(t, args): 
 	args_rising = args[0:len(sig.input_initial)/2]
 	args_falling = args[(len(sig.input_initial)/2):len(sig.input_initial)]
-	#print("fitting\n" + str(t));
 	return (Voltage*(sig.sigmoid(t, args_rising) + sig.sigmoid(t, args_falling)) - Voltage)
 
 def highside_pulse(t, args): 
@@ -41,56 +41,38 @@ def get_params(visualize, path, input_init, output_init):
 		lowside_index = 2
 		highside_index = 1
 	
-	input_sigma = [1]*len(data[0])
+	input_sigma = [1]*len(data[0]) # possibilty of giving the datapoints differend weights
 	output_sigma = [1]*len(data[0]) 
-	'''
-	max = 0;
-	min = Voltage;
-	for i in range(0, len(data[0])):
-		if data[lowside_index][i] > max:
-			max = data[lowside_index][i]
-		if data[highside_index][i] < min:
-			min = data[highside_index][i]
 	
-	for i in range(0, len(data[0])):	# top 20% of pulse and bottom 1% to 20%  get weighted 2 times stronger
-		if data[lowside_index][i] > max*0.8 or (data[lowside_index][i] > max*0.01 and data[lowside_index][i] < max*0.2):
-			input_sigma[i] = 0.5
-			
-		if data[highside_index][i] < ((Voltage-min)*0.2+min) or (data[highside_index][i] < ((Voltage-min)*0.99+min) and data[highside_index][i] > ((Voltage-min)*0.8+min)):
-			output_sigma[i] = 0.5
-	'''	
-
 	input_params = optimize.curve_fit(lowside_pulse_wr, data[0], data[lowside_index], input_init, sigma = input_sigma, bounds = (sig.input_lower_bound, sig.input_upper_bound), maxfev=5000)
 	output_params = optimize.curve_fit(highside_pulse_wr, data[0], data[highside_index], output_init, sigma = output_sigma, bounds = (sig.output_lower_bound, sig.output_upper_bound), maxfev=5000)
 	
 	input_fitting = [0]*len(data[0])
 	output_fitting = [0]*len(data[0])
 	
-	inp_rising = [0]*len(data[0])
-	
 	input_rms_error = aux.calc_rms_error_func(lowside_pulse, input_params[0], data[0], data[lowside_index])/Voltage
 	output_rms_error = aux.calc_rms_error_func(highside_pulse, output_params[0], data[0], data[highside_index])/Voltage
 
 	
 	if visualize:
-		plt.cla()
-		plt.clf()
-		fig = plt.gcf()
-		fig.set_size_inches(8, 6)
+		plt.cla();
+		plt.clf();
+		fig = plt.gcf();
+		fig.set_size_inches(8, 6);
 		for i in range(0,len(data[0])):
-			input_fitting[i] = lowside_pulse(data[0][i],input_params[0])
-			output_fitting[i] = highside_pulse(data[0][i],output_params[0])
+			input_fitting[i] = lowside_pulse(data[0][i],input_params[0]);
+			output_fitting[i] = highside_pulse(data[0][i],output_params[0]);
 			
-		linew = 1
-		plt.plot(data[0],data[lowside_index],'r-', linewidth=linew)
-		plt.plot(data[0],input_fitting,'r--', linewidth=linew)
-		plt.plot(data[0],data[highside_index],'g-', linewidth=linew)		
-		plt.plot(data[0],output_fitting,'g--', linewidth=linew)	
+		linew = 1;
+		plt.plot(data[0],data[lowside_index],'r-', linewidth=linew);
+		plt.plot(data[0],input_fitting,'r--', linewidth=linew);
+		plt.plot(data[0],data[highside_index],'g-', linewidth=linew);	
+		plt.plot(data[0],output_fitting,'g--', linewidth=linew);
 		
-		file_name = path.split("/")[len(path.split("/"))-1]
-		title = file[:len(file)-4]
-		plt.title(title)
-		plt.legend(["Input","Input fitting","Output","Output fitting"], loc = 'center left')
+		file_name = path.split("/")[len(path.split("/"))-1];
+		title = file[:len(file)-4];
+		plt.title(title);
+		plt.legend(["Input","Input fitting","Output","Output fitting"], loc = 'center left');
 		plt.ylabel("Voltage [V]");
 		plt.xlabel("Time [s]");
 		#plt.legend(["Input","Output","Input Rising Edge","Input Falling Edge","Output Rising Edge","Output Falling Edge", "Vdd/2"], loc = 'center left')

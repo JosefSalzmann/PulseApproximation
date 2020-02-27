@@ -250,8 +250,8 @@ elif int(sys.argv[1]) == 4:
 	first_der = [[0.0]*len(data[0]) for i in range(3)];
 	mult = 2000;
 	for i in range(1,len(first_der[0])):
-		first_der[1][i] = (data[1][i]*mult-data[1][i-1]*mult);
-		first_der[2][i] = (data[2][i]*mult-data[2][i-1]*mult);
+		first_der[1][i] = (data[1][i]-data[1][i-1])/(data[0][i]-data[0][i-1])*10**-9;
+		first_der[2][i] = (data[2][i]-data[2][i-1])/(data[0][i]-data[0][i-1])*10**-9;
 	
 	filter_size = 10;
 	percent_in_range = 0.001;

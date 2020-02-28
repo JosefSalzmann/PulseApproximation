@@ -7,10 +7,11 @@ import importlib
 
 # First parameter: path to the file that should be fitted.
 # Second parameter: name of the model function.
+# Third parameter: Vdd.
 
 sig_name = sys.argv[2];
 sig = importlib.import_module(sig_name, package=None)
-Voltage = 1.2; # Maybe also needs to be a parameter?
+Voltage = float(sys.argv[3]); # 1.2;
 params_per_sig = len(sig.trace_initial);
 
 def compensation_terms(args): # Calculates the number compensation terms needed (multiples of Vdd) such that the resulting trace is always between 0 and Vdd.
@@ -32,9 +33,9 @@ def trace_sigmoids_wr(t, *args): # Wrapper function which the fitting algorithm 
 def fit_trace(time, trace, lowres_time, lowres_trace): # Given a trace, this function calculates the number of sigmoids and their parameters to fit the trace.
 	first_der = [0.0]*len(time); 
 	for i in range(1,len(first_der)): # Calculate the first derivative of the given trace in order to find the turning points of the trace so that the number of sigmoids and their initial position can be determined.
-		if (time[i]-time[i-1]) != 0: # dat-files sometimes contain the same time stamp twice...
+		if (time[i]-time[i-1]) != 0:
 			first_der[i] = (trace[i]-trace[i-1])/(time[i]-time[i-1])*10**-9;
-		else:
+		else: # dat-files sometimes contain the same time stamp twice...
 			first_der[i] = first_der[i-1]; # in that case the derivative is just interpolated using the previous value.
 
 	filter_size = 10;
@@ -136,8 +137,6 @@ plt.ylabel("Voltage [V]");
 plt.xlabel("Time [s]");
 plt.savefig(imgpath + "_fitting.svg");
 #plt.show()
-
-
 
 
 

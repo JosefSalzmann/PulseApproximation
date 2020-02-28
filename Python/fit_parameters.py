@@ -5,24 +5,30 @@ from scipy import optimize
 from os import walk
 from mpl_toolkits import mplot3d
 import classes as cl
+import importlib
+import sys
+
+# First parameter: path to the folder that should be fitted.
+# Second parameter: name of the model function.
+# Third parameter: Vdd.
+# Fourth parameter: Approximation order.
 
 
-import atan_taylor as sig
-Voltage = 1.2
-num_points = 500
-folderpath = "../WaveformData/t4_u_all/"
+folderpath = sys.argv[1];
+sig_name = sys.argv[2];
+sig = importlib.import_module(sig_name, package=None);
+Voltage = float(sys.argv[3]); # 1.2;
+Lin_approx_order = int(sys.argv[4]); # 2;
 
-Lin_approx_order = 1
 
-def lowside_pulse(t, args): 
+
+def lowside_pulse(t, args): # Pulse that starts and ends at 0V.
 	args_rising = args[0:len(sig.input_initial)/2]
 	args_falling = args[(len(sig.input_initial)/2):len(sig.input_initial)]
 	return (Voltage*(sig.sigmoid(t, args_rising) + sig.sigmoid(t, args_falling)) - Voltage)
 
-def highside_pulse(t, args): 
+def highside_pulse(t, args): # Pulse that starts and ends at Vdd.
 	return Voltage - lowside_pulse(t,args);
-
-
 
 f = []
 for (dirpath, dirnames, filenames) in walk(folderpath):
@@ -34,36 +40,37 @@ dat_file_fittings = []
 
 for file in filenames:
 	if file.split(".")[1] == "dat":
-		dat_file_content.append(aux.read_file_with_name(folderpath + "/" + file, num_points))		
+		dat_file_content.append(aux.read_file_with_name(folderpath + "/" + file, sys.maxint))		
 
 
 fo = open(folderpath + "/fitting_parameters.txt", "r")
 fr = fo.read()
 line = fr.split("\n")
-n = len(line)
 line_cnt = 0
 file_names = []
-for i in range(0,n):
-	if len(line[i].split(":"))>=2:
-		file_names.append(line[i].split(":")[0].strip())
-		line[i] = line[i].split(":")[1]
+for i in range(0,len(line)):
+	line_sp = line[i].split(",");
+	if len(line_sp)>2:		
+		file_names.append(line_sp[0])
+		line[i] = ",".join(line_sp[1:len(line_sp)-2]);
 		line_cnt = line_cnt + 1
+	else:
+		break
+line = line[0:line_cnt];
+
 line_len = len(line[0].split(','))
-params = [[0 for i in range(line_cnt)] for j in range(line_len-3)]
+params = [[0.0 for i in range(line_cnt)] for j in range(line_len-1)]
+input_shifts = [0.0] * line_cnt;
 for i in range(0,line_cnt):
 	line_split = line[i].split(',');
 	dat_file_fittings.append(cl.Parameter_Set(file_names[i], np.array(map(float, line_split))))
 	cnt = 0
-	for j in range(0,line_len-2):
+	for j in range(0,line_len):
 		if j != sig.input_shift:
 			params[cnt][i] = dat_file_fittings[i].parameters[j]
-			cnt+=1;			
-
-
-
-
-
-
+			cnt+=1;		
+		else:
+			input_shifts[i] = dat_file_fittings[i].parameters[j]
 
 
 def meta_func(X,args):
@@ -90,7 +97,6 @@ for i in range(0, len(sig.input_initial)):
 	if i != sig.input_shift:
 		names[arg_c] = "input_" + str(sig.parameter_names[i]);
 		arg_c += 1
-	print(i)
 	names[i+len(sig.input_initial)-1] = "output_" + str(sig.parameter_names[i]);
 names[sig.input_length-1] = "input_pulse_length" ;
 
@@ -142,11 +148,20 @@ meta_output_params = [[0.0 for i in range(len(sig.input_initial))] for j in rang
 for i in range(0,count):
 	for j in range(0,len(sig.input_initial)):
 		meta_output_params[i][j] = meta_fittings[j][i]
+for i in range(0,count):
+	meta_output_params[i][sig.output_shift] = input_shifts[i] + meta_output_params[i][sig.output_shift];
+	meta_output_params[i][sig.output_length] = meta_output_params[i][sig.output_shift] + meta_output_params[i][sig.output_length];
 
 for i in range(0, len(dat_file_content)):
 	meta_output_fitting = [0]*len(dat_file_content[i].time)
+	output_highside = True;
+	if dat_file_content[i].input_pulse[0] > Voltage/2:
+		output_highside = False;
 	for j in range(0, len(dat_file_content[i].time)):
-		meta_output_fitting[j] = highside_pulse(dat_file_content[i].time[j], meta_output_params[i])
+		if output_highside:
+			meta_output_fitting[j] = highside_pulse(dat_file_content[i].time[j], meta_output_params[i])
+		else:
+			meta_output_fitting[j] = lowside_pulse(dat_file_content[i].time[j], meta_output_params[i])
 	plt.cla()
 	plt.clf()
 	fig = plt.gcf()

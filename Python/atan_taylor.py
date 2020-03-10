@@ -46,9 +46,14 @@ input_upper_bound = [1.2,27, 2,4,  -0.3,  27, 2, 4]
 
 parameter_names = ['left_steepness', 'left_shift', 'left_curvature_left', 'left_curvature_right', 'right_steepness', 'right_shift', 'right_curvature_left', 'right_curvature_right']
 
-output_initial = 	 input_initial
-output_lower_bound = input_lower_bound
-output_upper_bound = [1.5,27, 2,4,  -0.6,  27, 4, 2]
+output_initial = 	 [-0.8,  11.3, 1.5, 1.5,  0.8, 11.7, 1.5, 1.5] #t4_u
+output_lower_bound = [-1.2,  0,  0.1, 0.1, 0.3, 0, 0.1, 0.1]
+output_upper_bound = [-0.3,27, 4,4,  2,  27, 2, 4]
+
+
+steepness_index = 0;
+shift_index = 1;
+
 
 input_shift = 1
 input_length = 5

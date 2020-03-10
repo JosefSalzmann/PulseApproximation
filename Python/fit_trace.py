@@ -109,29 +109,34 @@ output_fitting = fit_trace(data[0], data[2], data_reduced[0], data_reduced[2]);
 
 approx_in = [0.0]*len(data_reduced[0]);
 approx_out = [0.0]*len(data_reduced[0]);
+input_fitting_error = [0.0]*len(data_reduced[0]);
+output_fitting_error = [0.0]*len(data_reduced[0]);
 for i in range(0,len(data_reduced[0])): # Calculate the fitted curves.
 	approx_in[i] = trace_sigmoids(data_reduced[0][i], input_fitting[0]);
 	approx_out[i] = trace_sigmoids(data_reduced[0][i], output_fitting[0]);
-	
+	input_fitting_error[i] = approx_in[i] - data_reduced[1][i];
+	output_fitting_error[i] = approx_out[i] - data_reduced[2][i];
 # Draw a picture of the original traces and the fitted curves.	
 plt.cla();
 plt.clf();
 fig = plt.gcf();
-fig.set_size_inches(12, 6)	;
+fig.set_size_inches(16, 4);
 linew = 1.5	;
 plt.plot(data[0],data[1],'r-', linewidth=linew);
-plt.plot(data[0],data[2],'g-', linewidth=linew);
 plt.plot(data_reduced[0],approx_in,'r--', linewidth=linew);
+plt.plot(data_reduced[0],input_fitting_error,'r-.', linewidth=linew);
+plt.plot(data[0],data[2],'g-', linewidth=linew);
 plt.plot(data_reduced[0],approx_out,'g--', linewidth=linew);
+plt.plot(data_reduced[0],output_fitting_error,'g-.', linewidth=linew);
 
 input_fitting_err = aux.calc_rms_error_func(trace_sigmoids, input_fitting[0], data_reduced[0], data_reduced[1])/Voltage;
 output_fitting_err = aux.calc_rms_error_func(trace_sigmoids, output_fitting[0], data_reduced[0], data_reduced[2])/Voltage;
 
-plt.text(0, Voltage/4, "In  RMSE: " + str(round(input_fitting_err,5)) + "\nOut RMSE: " + str(round(output_fitting_err,5)),family="monospace");
+plt.text(0, Voltage/8, "In  RMSE: " + str(round(input_fitting_err,5)) + "\nOut RMSE: " + str(round(output_fitting_err,5)),family="monospace");
 file_name = path.split("/")[len(path.split("/"))-1];
 title = file_name[:len(file_name)-4];
 plt.title(title);
-plt.legend(["Input","Output", "Input-fitting", "Output-fitting"], loc = 'center left');
+plt.legend(["Input","Input fitting","Input fitting error", "Output","Output fitting","Output fitting error"], loc = 'center left');
 imgpath = path[:len(path)-4];
 plt.ylabel("Voltage [V]");
 plt.xlabel("Time [s]");

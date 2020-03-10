@@ -22,14 +22,14 @@ Lin_approx_order = int(sys.argv[4]); # 2;
 
 
 
-def lowside_pulse(t, args): # Pulse that starts and ends at 0V.
-	args_rising = args[0:len(sig.input_initial)/2]
-	args_falling = args[(len(sig.input_initial)/2):len(sig.input_initial)]
-	return (Voltage*(sig.sigmoid(t, args_rising) + sig.sigmoid(t, args_falling)) - Voltage)
-
-def highside_pulse(t, args): # Pulse that starts and ends at Vdd.
-	return Voltage - lowside_pulse(t,args);
-
+def pulse(t,args):
+	args_left = args[0:len(sig.input_initial)/2];
+	args_right = args[(len(sig.input_initial)/2):len(sig.input_initial)];
+	Correction = 0;
+	if(args_left[sig.steepness_index] > 0 and args_right[sig.steepness_index] < 0):
+		Correction = 1;
+	return Voltage*(sig.sigmoid(t, args_left) + sig.sigmoid(t, args_right) - Correction);
+	
 f = []
 for (dirpath, dirnames, filenames) in walk(folderpath):
     f = filenames
@@ -154,14 +154,8 @@ for i in range(0,count):
 
 for i in range(0, len(dat_file_content)):
 	meta_output_fitting = [0]*len(dat_file_content[i].time)
-	output_highside = True;
-	if dat_file_content[i].input_pulse[0] > Voltage/2:
-		output_highside = False;
 	for j in range(0, len(dat_file_content[i].time)):
-		if output_highside:
-			meta_output_fitting[j] = highside_pulse(dat_file_content[i].time[j], meta_output_params[i])
-		else:
-			meta_output_fitting[j] = lowside_pulse(dat_file_content[i].time[j], meta_output_params[i])
+		meta_output_fitting[j] = pulse(dat_file_content[i].time[j], meta_output_params[i])
 	plt.cla()
 	plt.clf()
 	fig = plt.gcf()
@@ -175,7 +169,7 @@ for i in range(0, len(dat_file_content)):
 	plt.title(dat_file_content[i].file_name + " Meta fitting")
 	plt.legend(["Input","Output", "Meta Output fitting"], loc = 'center left')
 	#plt.show()
-	path = folderpath + dat_file_content[i].file_name
+	path = folderpath + "/" + dat_file_content[i].file_name
 	imgpath = path[:len(path)-4]
 	plt.savefig(imgpath + "_Meta_fitting.png")
 

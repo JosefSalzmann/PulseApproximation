@@ -22,19 +22,31 @@ num_points = int(sys.argv[4]); # 500;
 
 
 
-def lowside_pulse(t, args): # Pulse that starts and ends at 0V.
+'''def lowside_pulse(t, args): # Pulse that starts and ends at 0V.
 	args_rising = args[0:len(sig.input_initial)/2]
 	args_falling = args[(len(sig.input_initial)/2):len(sig.input_initial)]
 	return (Voltage*(sig.sigmoid(t, args_rising) + sig.sigmoid(t, args_falling)) - Voltage)
 
-def highside_pulse(t, args): # Pulse that starts and ends at Vdd.
+#def highside_pulse(t, args): # Pulse that starts and ends at Vdd.
 	return Voltage - lowside_pulse(t,args);
 	
 def lowside_pulse_wr(t,*args): # Wrapper function which the fitting algorithm can access.
 	return lowside_pulse(t,args)
 	
 def highside_pulse_wr(t,*args): # Wrapper function which the fitting algorithm can access.
-	return highside_pulse(t,args)
+	return highside_pulse(t,args)'''
+
+def pulse(t,args):
+	args_left = args[0:len(sig.input_initial)/2];
+	args_right = args[(len(sig.input_initial)/2):len(sig.input_initial)];
+	Correction = 0;
+	if(args_left[sig.steepness_index] > 0 and args_right[sig.steepness_index] < 0):
+		Correction = 1;
+	return Voltage*(sig.sigmoid(t, args_left) + sig.sigmoid(t, args_right) - Correction);
+	
+def pulse_wr(t,*args): # Wrapper function which the fitting algorithm can access.
+	return pulse(t,args)
+
 	
 	
 def get_params(visualize, path, input_init, output_init): # Fit a single file and return the fitting parameters
@@ -50,21 +62,35 @@ def get_params(visualize, path, input_init, output_init): # Fit a single file an
 	input_sigma = [1]*len(data[0]) # Possibilty of giving the datapoints differend weights.
 	output_sigma = [1]*len(data[0]) 
 	
-	lowside_params = optimize.curve_fit(lowside_pulse_wr, data[0], data[lowside_index], input_init, sigma = input_sigma, bounds = (sig.input_lower_bound, sig.input_upper_bound), maxfev=5000)
-	highside_params = optimize.curve_fit(highside_pulse_wr, data[0], data[highside_index], output_init, sigma = output_sigma, bounds = (sig.output_lower_bound, sig.output_upper_bound), maxfev=5000)
+	input_params = optimize.curve_fit(pulse_wr, data[0], data[1], input_init, sigma = input_sigma, bounds = (sig.input_lower_bound, sig.input_upper_bound), maxfev=5000)
+	output_params = optimize.curve_fit(pulse_wr, data[0], data[2], output_init, sigma = output_sigma, bounds = (sig.output_lower_bound, sig.output_upper_bound), maxfev=5000)
 	
-	lowside_fitting = [0]*len(data[0])
-	highside_fitting = [0]*len(data[0])
+	
+	#lowside_params = optimize.curve_fit(lowside_pulse_wr, data[0], data[lowside_index], input_init, sigma = input_sigma, bounds = (sig.input_lower_bound, sig.input_upper_bound), maxfev=5000)
+	#highside_params = optimize.curve_fit(highside_pulse_wr, data[0], data[highside_index], output_init, sigma = output_sigma, bounds = (sig.output_lower_bound, sig.output_upper_bound), maxfev=5000)
+	
+	
+	#lowside_fitting = [0]*len(data[0])
+	#highside_fitting = [0]*len(data[0])
+	
+	
+	input_fitting = [0]*len(data[0])
+	output_fitting = [0]*len(data[0])
+	input_fitting_error = [0]*len(data[0])
+	output_fitting_error = [0]*len(data[0])
 	
 	# Calculate the RMS error of the resulting function scaled by the operating voltage.
-	lowside_rms_error = aux.calc_rms_error_func(lowside_pulse, lowside_params[0], data[0], data[lowside_index])/Voltage;
-	highside_rms_error = aux.calc_rms_error_func(highside_pulse, highside_params[0], data[0], data[highside_index])/Voltage;
+	input_rms_error = aux.calc_rms_error_func(pulse, input_params[0], data[0], data[1])/Voltage;
+	output_rms_error = aux.calc_rms_error_func(pulse, output_params[0], data[0], data[2])/Voltage;
 	
-	input_rms_error = lowside_rms_error;
-	output_rms_error = highside_rms_error;
-	if lowside_index == 2:
-		input_rms_error = highside_rms_error;
-		output_rms_error = lowside_rms_error;
+	#lowside_rms_error = aux.calc_rms_error_func(lowside_pulse, lowside_params[0], data[0], data[lowside_index])/Voltage;
+	#highside_rms_error = aux.calc_rms_error_func(highside_pulse, highside_params[0], data[0], data[highside_index])/Voltage;
+	
+	#input_rms_error = lowside_rms_error;
+	#output_rms_error = highside_rms_error;
+	#if lowside_index == 2:
+		#input_rms_error = highside_rms_error;
+		#output_rms_error = lowside_rms_error;
 
 	if visualize:
 		plt.cla();
@@ -72,26 +98,42 @@ def get_params(visualize, path, input_init, output_init): # Fit a single file an
 		fig = plt.gcf();
 		fig.set_size_inches(8, 6);
 		for i in range(0,len(data[0])):
-			lowside_fitting[i] = lowside_pulse(data[0][i],lowside_params[0]);
+			input_fitting[i] = pulse(data[0][i],input_params[0]);
+			output_fitting[i] = pulse(data[0][i],output_params[0]);
+			'''lowside_fitting[i] = lowside_pulse(data[0][i],lowside_params[0]);
 			highside_fitting[i] = highside_pulse(data[0][i],highside_params[0]);
+			if lowside_index == 1:
+				input_fitting_error[i] = lowside_fitting[i] - data[1][i];
+				output_fitting_error[i] = highside_fitting[i] - data[2][i];
+			else:
+				input_fitting_error[i] = highside_fitting[i] - data[1][i];
+				output_fitting_error[i] = lowside_fitting[i] - data[2][i];'''
+			input_fitting_error[i] = input_fitting[i] - data[1][i];
+			output_fitting_error[i] = output_fitting[i] - data[2][i];
 			
 		linew = 1;
+		
+		
 			
 		plt.plot(data[0],data[1],'r-', linewidth=linew);
-		if lowside_index == 1:
+		'''if lowside_index == 1:
 			plt.plot(data[0],lowside_fitting,'r--', linewidth=linew);
 		else:
-			plt.plot(data[0],highside_fitting,'r--', linewidth=linew);
+			plt.plot(data[0],highside_fitting,'r--', linewidth=linew);'''
+		plt.plot(data[0],input_fitting,'r--', linewidth=linew);
+		plt.plot(data[0],input_fitting_error,'r-.', linewidth=linew);	
 		plt.plot(data[0],data[2],'g-', linewidth=linew);	
-		if lowside_index == 1:
+		'''if lowside_index == 1:
 			plt.plot(data[0],highside_fitting,'g--', linewidth=linew);
 		else:
-			plt.plot(data[0],lowside_fitting,'g--', linewidth=linew);
+			plt.plot(data[0],lowside_fitting,'g--', linewidth=linew);'''
+		plt.plot(data[0],output_fitting,'g--', linewidth=linew);
+		plt.plot(data[0],output_fitting_error,'g-.', linewidth=linew);	
 		
 		file_name = path.split("/")[len(path.split("/"))-1];
 		title = file[:len(file)-4];
 		plt.title(title);
-		plt.legend(["Input","Input fitting","Output","Output fitting"], loc = 'center left');
+		plt.legend(["Input","Input fitting","Input fitting error", "Output","Output fitting","Output fitting error"], loc = 'center left');
 		plt.ylabel("Voltage [V]");
 		plt.xlabel("Time [s]");
 		#plt.legend(["Input","Output","Input Rising Edge","Input Falling Edge","Output Rising Edge","Output Falling Edge", "Vdd/2"], loc = 'center left')
@@ -100,18 +142,19 @@ def get_params(visualize, path, input_init, output_init): # Fit a single file an
 		imgpath = path[:len(path)-3]
 		plt.savefig(imgpath + "svg")	
 	
-	input_arr_len = len(lowside_params[0])
-	output_arr_len = len(lowside_params[0])
-	ret = [0]*(input_arr_len+output_arr_len+2)
-	for i in range(0,input_arr_len):
-		if lowside_index == 1:
+	arr_len = len(input_params[0])
+	ret = [0]*(2*arr_len+2)
+	for i in range(0, arr_len):
+		'''if lowside_index == 1:
 			ret[i] = lowside_params[0][i]
 			ret[input_arr_len+i] = highside_params[0][i]
 		else:
 			ret[input_arr_len+i] = lowside_params[0][i]
-			ret[i] = highside_params[0][i]
-	ret[input_arr_len+output_arr_len] = input_rms_error
-	ret[input_arr_len+output_arr_len+1] = output_rms_error
+			ret[i] = highside_params[0][i]'''
+		ret[i] = input_params[0][i]
+		ret[arr_len+i] = output_params[0][i]
+	ret[arr_len*2] = input_rms_error
+	ret[arr_len*2+1] = output_rms_error
 		
 	return ret
 

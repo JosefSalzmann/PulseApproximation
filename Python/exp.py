@@ -3,21 +3,25 @@ import numpy as np
 def sigmoid(t, args):
 	return 1/(1+np.exp(-args[0]*(t*10**10-args[1])))
 
-input_initial = 	[1, 10,-1, 10]
+input_initial = 	[1, 11,-1, 12]
 input_lower_bound = [0, 0,-100, 0]
 input_upper_bound = [100, 25,0, 25]
 
 
-output_initial = 	 input_initial
-output_lower_bound = input_lower_bound
-output_upper_bound = input_upper_bound
+output_initial = 	 [-1, 11,1, 12] 
+output_lower_bound = [-100, 0,0, 0] 
+output_upper_bound = [0, 25,100, 25]
 
 parameter_names = ['left_steepness', 'left_shift', 'right_steepness', 'right_shift'];
 
+steepness_index = 0;
+shift_index = 1;
+
+
 input_shift = 1;
 input_length = 3;
-output_shift = 3;
-output_length = 1;
+output_shift = 1; #delay
+output_length = 3;
 
 trace_shift = 1; # all parameters with this index will be deteremined automatically
 trace_initial = [1, 0];

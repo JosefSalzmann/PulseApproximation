@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 
-import atan_taylor as sig
+import exp as sig
 
 def read_file(filepath):
  	f = open(filepath + "/fitting_parameters.txt", "r")

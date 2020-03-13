@@ -244,7 +244,7 @@ elif int(sys.argv[1]) == 3:
 	plt.show()
 elif int(sys.argv[1]) == 4:
 
-	path = "../WaveformData/t4_traces/inv_t4_invSim_620_200Traces.dat"
+	path = "../WaveformData/t4_traces/inv_t4_invSim_Traces.dat"
 	data = aux.read_file(path, 100000)
 	
 	first_der = [[0.0]*len(data[0]) for i in range(3)];
@@ -256,11 +256,11 @@ elif int(sys.argv[1]) == 4:
 	filter_size = 10;
 	percent_in_range = 0.001;
 	filter = [0.0]*filter_size;
-	next_edge_rising = False;
+	next_edge_rising = True;
 	switching_points = [];
-	min_height = 0.02;
+	min_height = 0.05;
 	for i in range(0, len(data[0])):
-		filter[i%filter_size] = first_der[2][i];
+		filter[i%filter_size] = first_der[1][i];
 		if (np.sum(filter) > min_height*filter_size and next_edge_rising) or (np.sum(filter) < -1*min_height*filter_size and not next_edge_rising):
 			all_same_sign = True;			
 			for j in range(1,filter_size):
@@ -282,7 +282,7 @@ elif int(sys.argv[1]) == 4:
 	approx = [0.0]*len(data[0]);
 	args = [0.0]*(2*len(switching_points));
 	for i in range(0,len(switching_points)):
-		args[2*i] = 1.5*(-1)**(i+1);
+		args[2*i] = 0.7*(-1)**(i+0);
 		args[2*i+1] = data[0][switching_points[i]];
 		
 	input_init = args;
@@ -291,8 +291,8 @@ elif int(sys.argv[1]) == 4:
 	lower_bound[1] = 0;
 	upper_bound[len(args)-1] = data[0][len(data[0])-1];
 	for i in range(0,len(switching_points)):
-		lower_bound[2*i] = args[2*i]-1.49;
-		upper_bound[2*i] = args[2*i]+1.49;
+		lower_bound[2*i] = args[2*i]-2.69;
+		upper_bound[2*i] = args[2*i]+2.69;
 	for i in range(0,len(switching_points)-1):
 		lower_bound[2*i+1+2] = (args[2*i+1]+args[2*i+3])/2;
 		upper_bound[2*i+1] = (args[2*i+1]+args[2*i+3])/2;
@@ -300,28 +300,30 @@ elif int(sys.argv[1]) == 4:
 		approx[i] = trace_simple_exp(data[0][i], args);	
 	
 	data_reduced = aux.read_file(path, 10000)
-	input_params = optimize.curve_fit(trace_simple_exp_wr, data_reduced[0], data_reduced[2], input_init, bounds = (lower_bound, upper_bound), maxfev=5000)
+	#input_params = optimize.curve_fit(trace_simple_exp_wr, data_reduced[0], data_reduced[1], input_init, bounds = (lower_bound, upper_bound), maxfev=5000)
 	
 	#print(input_params);
 	
-	for i in range(0,len(first_der[0])):
-		approx[i] = trace_simple_exp(data[0][i], input_params[0]);
+	#for i in range(0,len(first_der[0])):
+		#approx[i] = trace_simple_exp(data[0][i], input_params[0]);
 	
 	plt.cla()
 	plt.clf()
 	fig = plt.gcf()
-	fig.set_size_inches(12, 6)
+	fig.set_size_inches(16, 4)
 
 		
 	linew = 1.5
 		
-	#plt.plot(data[0],data[1],'r-', linewidth=linew);
-	plt.plot(data[0],data[2],'g-', linewidth=linew);
+	plt.plot(data[0],data[1],'r-', linewidth=linew);
+	#plt.plot(data[0],data[2],'g-', linewidth=linew);
 	plt.plot(data[0],approx,'b-', linewidth=linew);
-	plt.plot(data[0],first_der[2],'g--', linewidth=linew);
+	#plt.plot(data[0],first_der[2],'g--', linewidth=linew);
 
+	plt.ylabel("Voltage [V]");
+	plt.xlabel("Time [s]");
 	plt.title('')
-	plt.legend(["Input","Output"], loc = 'center left')
+	plt.legend(["Input","Initial Guess"], loc = 'center left')
 	plt.show()
 	
 	

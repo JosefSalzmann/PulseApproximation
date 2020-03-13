@@ -3,14 +3,14 @@ import numpy as np
 def sigmoid(t, args):
 	return 1/(1+np.exp(-args[0]*(t*10**10-args[1])))
 
-input_initial = 	[1, 11,-1, 12]
-input_lower_bound = [0, 0,-100, 0]
-input_upper_bound = [100, 25,0, 25]
+input_initial = 	[-1, 11,1, 12] #[1, 11,-1, 12]
+input_lower_bound = [-100, 0,0, 0] #[0, 0,-100, 0]
+input_upper_bound = [0, 25,100, 25]#[100, 25,0, 25]
 
 
-output_initial = 	 [-1, 11,1, 12] 
-output_lower_bound = [-100, 0,0, 0] 
-output_upper_bound = [0, 25,100, 25]
+output_initial = 	 [1, 11,-1, 12]#[-1, 11,1, 12] 
+output_lower_bound = [0, 0,-100, 0]#[-100, 0,0, 0] 
+output_upper_bound = [100, 25,0, 25]#[0, 25,100, 25]
 
 parameter_names = ['left_steepness', 'left_shift', 'right_steepness', 'right_shift'];
 

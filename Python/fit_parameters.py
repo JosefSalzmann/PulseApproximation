@@ -103,14 +103,17 @@ names[sig.input_length-1] = "input_pulse_length" ;
 fw = open(folderpath + "/meta_fittings.txt", "w+")
 for i in range(0, len(sig.input_initial)):
 	print(names[len(sig.input_initial)-1+i] + "=");
-	fw.write(names[len(sig.input_initial)-1+i] + "=" + "\n");
+	fw.write(names[len(sig.input_initial)-1+i] + "\n");
 	print(str(meta_params[i][0])+ " +");
-	fw.write(str(meta_params[i][0])+ " +" + "\n");
+	fw.write("offset," + str(meta_params[i][0]) + "\n");
 	arg_count = 1;
 	for j in range(0, len(sig.input_initial)-1):
 		for k in range(1, Lin_approx_order+1):
-			print(str(meta_params[i][arg_count]) + "*" + names[j] + "^" + str(k) + "+");
-			fw.write(str(meta_params[i][arg_count]) + "*" + names[j] + "^" + str(k) + " +" + "\n");
+			if(j == len(sig.input_initial)-2 and k == Lin_approx_order):
+				print(str(meta_params[i][arg_count]) + "*" + names[j] + "^" + str(k));				
+			else:
+				print(str(meta_params[i][arg_count]) + "*" + names[j] + "^" + str(k) + "+");
+			fw.write(names[j] + "," + str(k) +  "," + str(meta_params[i][arg_count]) + "\n");
 			arg_count+=1			
 	print("");
 	fw.write("\n");
@@ -137,11 +140,12 @@ fitting_sq_errors = [[0 for i in range(count)] for i in range(len(sig.input_init
 for i in range(0, len(sig.input_initial)):
 	fitting_sq_errors[i] = np.subtract(params[len(sig.input_initial)-1+i],meta_fittings[i])**2
 
+fw.write("\n\n");
 rms_errors = [0 for i in range(len(sig.input_initial))]
 for i in range(0, len(sig.input_initial)):
 	rms_errors[i] = np.sqrt(sum(fitting_sq_errors[i])/len(fitting_sq_errors[i]))/Voltage
 	print(names[len(sig.input_initial)-1+i] + " RMSE: " + str(rms_errors[i]))
-	fw.write(names[len(sig.input_initial)-1+i] + " RMSE: " + str(rms_errors[i]) + "\n");
+	fw.write(names[len(sig.input_initial)-1+i] + " RMSE," + str(rms_errors[i]) + "\n");
 fw.close()
 	
 meta_output_params = [[0.0 for i in range(len(sig.input_initial))] for j in range(count)]

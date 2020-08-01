@@ -57,7 +57,7 @@ def calc_rms_error_data(original, fitted):
 	return np.sqrt(sum(sq_error)/len(sq_error))
 	
 	
-	
+
 	
 	
 	

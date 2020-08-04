@@ -1,2 +1,6 @@
 *.pyc
 *.png
+*.csv
+*.svg
+*.txt
+*.json

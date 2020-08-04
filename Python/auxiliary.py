@@ -3,7 +3,7 @@ import numpy as np
 import classes as cl
 
 def read_file(path, num_points):
- 	f = open(path, "r")
+	f = open(path, "r")
 	fr = f.read()
 	line = fr.split(";\n")
 	n = min(num_points, len(line))
@@ -23,7 +23,7 @@ def read_file(path, num_points):
 	return [time, input, output]
 	
 def read_file_with_name(path, num_points):
- 	f = open(path, "r")
+	f = open(path, "r")
 	fr = f.read()
 	line = fr.split(";\n")
 	n = min(num_points, len(line))
@@ -40,8 +40,8 @@ def read_file_with_name(path, num_points):
 		input[i] = float(number[1])
 		output[i] = float(number[2])
 		
-	path_split = path.split('/');
-	filename = path_split[len(path_split)-1];
+	path_split = path.split('/')
+	filename = path_split[len(path_split)-1]
 	return cl.Pulse_Set(filename, time, input, output)
 	
 def calc_rms_error_func(fitting_func, params, x, original):

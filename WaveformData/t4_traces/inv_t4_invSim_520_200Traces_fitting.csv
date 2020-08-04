@@ -6,7 +6,7 @@ Steepness,Shift
 -1.43079,51.16144
 1.21641,56.61503
 -1.64591,68.64487
-Input compensations terms,3
+Input compensation terms,3.0
 Output parameters
 Steepness,Shift
 -1.64387,19.5989
@@ -15,6 +15,6 @@ Steepness,Shift
 1.17974,53.80932
 -1.45004,58.27053
 1.29648,71.07391
-Output compensations terms,2
-Input RMSE,0.011653
-Output RMSE,0.0121643
+Output compensations term,2.0
+Input RMSE,0.0115863
+Output RMSE,0.0120947

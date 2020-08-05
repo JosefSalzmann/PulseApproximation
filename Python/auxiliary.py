@@ -55,6 +55,28 @@ def calc_rms_error_func(fitting_func, params, x, original):
 def calc_rms_error_data(original, fitted):
 	sq_error = np.subtract(original,fitted)**2	
 	return np.sqrt(sum(sq_error)/len(sq_error))
+
+def red_transfer_fnc_parameters(path):
+	f = open(path, "r")
+	fr = f.read()
+	line = fr.split("\n")
+	n = len(line)
+	blank_indices_list = [0]
+	for i in range (0,n): # parameters are seperated by blanks
+		if line[i] == '':
+			if blank_indices_list[len(blank_indices_list)-1] == (i):
+				break
+			else:
+				blank_indices_list.append(i+1)
+	del blank_indices_list[len(blank_indices_list)-1] # remove last element
+	tr_fnc_parameters = [[0.0 for i in range(blank_indices_list[1]-2)] for j in range(len(blank_indices_list))]
+	for i in range(0, len(blank_indices_list)):
+		index = blank_indices_list[i]+1
+		for j in range(0, blank_indices_list[1]-2):
+			line_split = line[index+j].split(",")
+			param = line_split[len(line_split)-1]
+			tr_fnc_parameters[i][j] = float(param)
+	return tr_fnc_parameters
 	
 	
 	

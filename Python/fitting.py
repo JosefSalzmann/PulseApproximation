@@ -52,8 +52,8 @@ def pulse_wr(t,*args): # Wrapper function which the fitting algorithm can access
 def get_params(visualize, path, input_init, output_init): # Fit a single file and return the fitting parameters
 	data = aux.read_file(path, num_points)
 	
-	lowside_index = 1
-	highside_index = 2
+	#lowside_index = 1
+	#highside_index = 2
 	
 	if data[1][len(data[1])-1] > Voltage / 2 and data[1][0] > Voltage / 2: # Determine which pulse is highside or lowside.
 		lowside_index = 2

@@ -163,7 +163,7 @@ for i in range(0, len(input_fitting[0])//len(sig.trace_initial)):
 		write_str.append(str(round(input_fitting[0][i*len(sig.trace_initial)+j], 5)) + ",")	
 	write_str.append(str(round(input_fitting[0][i*len(sig.trace_initial) + len(sig.trace_initial)-1],5)))	
 	write_str.append("\n")
-write_str.append("Input compensation terms," + str(compensation_terms(input_fitting[0])) + "\n")	
+write_str.append("Input compensations terms," + str(compensation_terms(input_fitting[0])) + "\n")	
 	
 write_str.append("Output parameters\n")
 write_str.append(''.join(parameter_string))

@@ -7,25 +7,29 @@ from mpl_toolkits import mplot3d
 import classes as cl
 import importlib
 import sys
-
-# First parameter: path to the file that should be fitted.
-# Second parameter: name of the model function.
-# Third parameter: Vdd.
-# Fourth parameter: Approximation order.
+import argparse
 
 
-filepath = sys.argv[1]
-sig_name = sys.argv[2]
+parser = argparse.ArgumentParser(description='asdf')
+parser.add_argument('-t', help="path to trace file that should be fitted using the transfer functions")
+parser.add_argument('-f', help="path to fitting function")
+parser.add_argument('-v', help="Vdd")
+parser.add_argument('-u', help="path to transfer function with upside pulse as input and lowside pulse as output")
+parser.add_argument('-l', help="path to transfer function with lowside pulse as input and upside pulse as output")
+
+args = parser.parse_args()
+
+filepath = args.t[1:len(args.t)] # remove blank from obtained string 
+sig_name = args.f[1:len(args.f)]
 sig = importlib.import_module(sig_name, package=None)
-Voltage = float(sys.argv[3]) # 1.2
-input_upside_pulse_meta_func = sys.argv[4] # input pulse starts and ends at Vdd
-input_lowside_pulse_meta_func = sys.argv[5] # input pulse starts and ends at 0V
+Voltage = float(args.v[1:len(args.v)]) # 1.2
+input_upside_pulse_meta_func = args.u[1:len(args.u)] # input pulse starts and ends at Vdd
+input_lowside_pulse_meta_func = args.l[1:len(args.l)] # input pulse starts and ends at 0V
 params_per_sig = len(sig.trace_initial)
 
 
 #########
 Lin_approx_order = 3
-num_comp_terms = 2
 #########
 
 

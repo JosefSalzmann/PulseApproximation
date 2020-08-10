@@ -21,26 +21,11 @@ Voltage = float(sys.argv[3]) # 1.2
 num_points = int(sys.argv[4]) # 500
 
 
-
-'''def lowside_pulse(t, args): # Pulse that starts and ends at 0V.
-	args_rising = args[0:len(sig.input_initial)//2]
-	args_falling = args[(len(sig.input_initial)//2):len(sig.input_initial)]
-	return (Voltage*(sig.sigmoid(t, args_rising) + sig.sigmoid(t, args_falling)) - Voltage)
-
-#def highside_pulse(t, args): # Pulse that starts and ends at Vdd.
-	return Voltage - lowside_pulse(t,args)
-	
-def lowside_pulse_wr(t,*args): # Wrapper function which the fitting algorithm can access.
-	return lowside_pulse(t,args)
-	
-def highside_pulse_wr(t,*args): # Wrapper function which the fitting algorithm can access.
-	return highside_pulse(t,args)'''
-
 def pulse(t,args):
-	args_left = args[0:len(sig.input_initial)//2]
-	args_right = args[(len(sig.input_initial)//2):len(sig.input_initial)]
+	args_left = args[0:sig.num_args]
+	args_right = args[sig.num_args:2*sig.num_args]
 	Correction = 0
-	if(args_left[sig.steepness_index] > 0 and args_right[sig.steepness_index] < 0):
+	if(args_left[0] > 0 and args_right[0] < 0):
 		Correction = 1
 	return Voltage*(sig.sigmoid(t, args_left) + sig.sigmoid(t, args_right) - Correction)
 	
@@ -49,21 +34,58 @@ def pulse_wr(t,*args): # Wrapper function which the fitting algorithm can access
 
 	
 	
-def get_params(visualize, path, input_init, output_init): # Fit a single file and return the fitting parameters
+def get_params(visualize, path): # Fit a single file and return the fitting parameters
 	data = aux.read_file(path, num_points)
 	
-	#lowside_index = 1
-	#highside_index = 2
+	input_is_lowside = True
 	
 	if data[1][len(data[1])-1] > Voltage / 2 and data[1][0] > Voltage / 2: # Determine which pulse is highside or lowside.
-		lowside_index = 2
-		highside_index = 1
+		input_is_lowside = False
+
+	input_init = [0.0]*(2*sig.num_args)
+	output_init = [0.0]*(2*sig.num_args)
+	input_lower_bound = [0.0]*(2*sig.num_args)
+	input_upper_bound = [0.0]*(2*sig.num_args)
+	output_lower_bound = [0.0]*(2*sig.num_args)
+	output_upper_bound = [0.0]*(2*sig.num_args)
+
+	if input_is_lowside:
+		input_init[:sig.num_args] = sig.rising_initial
+		input_init[sig.num_args:2*sig.num_args] = sig.falling_initial
+		input_lower_bound[:sig.num_args] = sig.rising_lower_bound
+		input_lower_bound[sig.num_args:2*sig.num_args] = sig.falling_lower_bound
+		input_upper_bound[:sig.num_args] = sig.rising_upper_bound
+		input_upper_bound[sig.num_args:2*sig.num_args] = sig.falling_upper_bound
+		output_init[:sig.num_args] = sig.falling_initial
+		output_init[sig.num_args:2*sig.num_args] = sig.rising_initial
+		output_lower_bound[:sig.num_args] = sig.falling_lower_bound
+		output_lower_bound[sig.num_args:2*sig.num_args] = sig.rising_lower_bound
+		output_upper_bound[:sig.num_args] = sig.falling_upper_bound
+		output_upper_bound[sig.num_args:2*sig.num_args] = sig.rising_upper_bound
+	else:	
+		input_init[:sig.num_args] = sig.falling_initial
+		input_init[sig.num_args:2*sig.num_args] = sig.rising_initial
+		input_lower_bound[:sig.num_args] = sig.falling_lower_bound
+		input_lower_bound[sig.num_args:2*sig.num_args] = sig.rising_lower_bound
+		input_upper_bound[:sig.num_args] = sig.falling_upper_bound
+		input_upper_bound[sig.num_args:2*sig.num_args] = sig.rising_upper_bound
+		output_init[:sig.num_args] = sig.rising_initial
+		output_init[sig.num_args:2*sig.num_args] = sig.falling_initial
+		output_lower_bound[:sig.num_args] = sig.rising_lower_bound
+		output_lower_bound[sig.num_args:2*sig.num_args] = sig.falling_lower_bound
+		output_upper_bound[:sig.num_args] = sig.rising_upper_bound
+		output_upper_bound[sig.num_args:2*sig.num_args] = sig.falling_upper_bound
+
+	input_init[1]-=sig.default_pulse_length/2
+	input_init[sig.num_args+1]+=sig.default_pulse_length/2
+	output_init[1]-=sig.default_pulse_length/2
+	output_init[sig.num_args+1]+=sig.default_pulse_length/2
 	
 	input_sigma = [1]*len(data[0]) # Possibilty of giving the datapoints differend weights.
 	output_sigma = [1]*len(data[0]) 
 	
-	input_params = optimize.curve_fit(pulse_wr, data[0], data[1], input_init, sigma = input_sigma, bounds = (sig.input_lower_bound, sig.input_upper_bound), maxfev=5000)
-	output_params = optimize.curve_fit(pulse_wr, data[0], data[2], output_init, sigma = output_sigma, bounds = (sig.output_lower_bound, sig.output_upper_bound), maxfev=5000)
+	input_params = optimize.curve_fit(pulse_wr, data[0], data[1], input_init, sigma = input_sigma, bounds = (input_lower_bound, input_upper_bound), maxfev=5000)
+	output_params = optimize.curve_fit(pulse_wr, data[0], data[2], output_init, sigma = output_sigma, bounds = (output_lower_bound, output_upper_bound), maxfev=5000)
 	
 	
 	#lowside_params = optimize.curve_fit(lowside_pulse_wr, data[0], data[lowside_index], input_init, sigma = input_sigma, bounds = (sig.input_lower_bound, sig.input_upper_bound), maxfev=5000)
@@ -164,16 +186,19 @@ for (dirpath, dirnames, filenames) in walk(folderpath):
     break
 
 fw = open(folderpath + "/fitting_parameters.txt", "w+")
-input_param_names = sig.parameter_names
-output_param_names = sig.parameter_names
-input_param_names[sig.input_shift] = "shift"
-input_param_names[sig.input_length] = "length"
-output_param_names[sig.output_shift] = "delay"
-output_param_names[sig.output_length] = "length"
+input_param_names = ['']*(2*sig.num_args)
+output_param_names = ['']*(2*sig.num_args)
+for i in range(0,sig.num_args):
+	input_param_names[i] = "left_" + sig.parameter_names[i]
+	input_param_names[sig.num_args + i] = "right_" + sig.parameter_names[i]
+	output_param_names[i] = "left_" + sig.parameter_names[i]
+	output_param_names[sig.num_args + i] = "right_" + sig.parameter_names[i]
+input_param_names[1] = "shift"
+input_param_names[sig.num_args+1] = "length"
+output_param_names[1] = "delay"
+output_param_names[sig.num_args+1] = "length"
 print("Filename : [ input_" + " input_".join(input_param_names) + " output_" + " output_".join(output_param_names) + " input_RMSE output_RMSE]")
 
-input_init = sig.input_initial
-output_init = sig.output_initial
 start = timer()
 
 sum_of_error = [0]*2 # 0 = input, 1 = output
@@ -181,7 +206,7 @@ max_error = [0]*2
 count = 0
 for file in filenames: # Iterate through every file in the specified folder and fit the .dat files.
 	if file.split(".")[1] == "dat":
-		res = get_params(True, folderpath + "/" + file, input_init, output_init)
+		res = get_params(True, folderpath + "/" + file)
 		
 		sum_of_error[0] = sum_of_error[0] + res[len(res)-2]
 		sum_of_error[1] = sum_of_error[1] + res[len(res)-1]
@@ -189,12 +214,6 @@ for file in filenames: # Iterate through every file in the specified folder and 
 			max_error[0] = res[len(res)-2]
 		if res[len(res)-1] > max_error[1]:
 			max_error[1] = res[len(res)-1]
-		
-		#input_init = res[:len(sig.input_initial)]
-		#output_init = res[len(sig.input_initial):len(sig.input_initial)*2]
-		
-		
-		#print(np.round_(res,5))
 		
 		
 		# Parameter correction
@@ -204,9 +223,9 @@ for file in filenames: # Iterate through every file in the specified folder and 
 		# output delay = absolute shift of the left output sigmoid - absolute shift of the left input sigmoid		
 		# Note that all the shift values describe the shifts of the single sigmoids and not fitted curve as a whole.
 		# Example: An input pulse shift of 2ns means that the left switching waveform of the input pulse crosses Vdd/2 at 2ns, but the input pulse as whole need not cross Vdd at this point.
-		res[sig.input_length] = res[sig.input_length]-res[sig.input_shift]
-		res[len(sig.input_initial) + sig.output_length] = res[len(sig.input_initial) + sig.output_length]-res[len(sig.input_initial) + sig.output_shift]
-		res[len(sig.input_initial) + sig.output_shift] = res[len(sig.input_initial) + sig.output_shift] - res[sig.input_shift]
+		res[sig.num_args+1] = res[sig.num_args+1]-res[1] # Calculate input length from shifts
+		res[sig.num_args*2 + sig.num_args + 1] = res[sig.num_args*2 + sig.num_args + 1]-res[sig.num_args*2 + 1]
+		res[sig.num_args*2 + 1] = res[sig.num_args*2 + 1] - res[1]
 		
 		
 		res = np.round_(np.array(res),decimals = 7)

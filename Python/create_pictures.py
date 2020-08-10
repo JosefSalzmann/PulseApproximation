@@ -96,7 +96,7 @@ def trace_simple_exp_wr(t, *args):
 	return trace_simple_exp(t, args)
 
 max_x = 10
-length = 500
+length = 1000
 
 x = [0.0]*length
 
@@ -325,13 +325,42 @@ elif int(sys.argv[1]) == 4:
 	plt.title('')
 	plt.legend(["Input","Initial Guess"], loc = 'center left')
 	plt.show()
+
+elif int(sys.argv[1]) == 5:
+	first_approx = [0.0]*length
+	second_approx = [0.0]*length
+	third_approx = [0.0]*length
+	fourth_approx = [0.0]*length
+	tan = [0.0]*length
+
+
+	for i in range(0,length):
+		x[i] = x[i]/7
+		first_approx[i] = x[i]
+		second_approx[i] = first_approx[i] + (x[i]**3)/3
+		third_approx[i] = second_approx[i] + (x[i]**5)*0.133333333333333
+		fourth_approx[i] = third_approx[i] + (x[i]**7)*0.053968253968254
+		tan[i] = np.tan(x[i])
+
+	plt.cla()
+	plt.clf()
+	fig = plt.gcf()
+	fig.set_size_inches(8, 6)
+
+	linew = 1
+	#fig, ax = plt.subplots()
+	#ax.axhline(y=0, color='k')
+	#ax.axvline(x=0, color='k')
 	
+		
+	plt.plot(x,tan,'k-', linewidth=linew)
+	plt.plot(x,first_approx,'r-', linewidth=linew)
+	plt.plot(x,second_approx,'g-', linewidth=linew)
+	plt.plot(x,third_approx,'b-', linewidth=linew)
+	plt.plot(x,fourth_approx,'y-', linewidth=linew)
 	
-	
-	
-	
-	
-	
-	
-	
-	
+
+	plt.title('Taylor approximation of tan(x)')
+	plt.legend(["tan(x)", "Approx. of 1st order", "Approx. of 3rd order", "Approx. of 5th order", "Approx. of 7th order"], loc = 'lower center')
+	#plt.text(-10, 1, "text")
+	plt.show()

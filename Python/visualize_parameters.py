@@ -11,10 +11,12 @@ def read_file(filepath):
 	n = len(line)
 	line_cnt = 0
 	for i in range(0,n):
-		if len(line[i].split(":"))>=2:
-			line[i] = line[i].split(":")[1]
+		if len(line[i].split(","))>=3:
+			line[i] = line[i][len(line[i].split(",")[0])+1:len(line[i])]
 			#line[i] = line[i][:len(line[i])-1]
 			line_cnt = line_cnt + 1
+		else:
+			break
 	line_len = len(line[0].split(','))
 	ret = [[0 for i in range(line_cnt-1)] for j in range(line_len)]
 	for i in range(0,line_cnt-1):
@@ -29,25 +31,27 @@ def read_file(filepath):
 	
 	
 
-params = read_file("../WaveformData/t4_u_all/")
+params = read_file("../WaveformData/t4_d/")
 	
 # visualize parameters depending on input pulse length
 colors = ['b-','g-','r-','c-','m-','y-','k-','b--','g--','r--','c--','m--','y--','k--']
 
 names = ['']*(len(params)-1)
 arg_c = 0
-for i in range(0, len(sig.input_initial)):
-	if i != sig.input_shift:
-		names[arg_c] = "input_" + str(sig.parameter_names[i])
+for i in range(0, sig.num_args):
+	if i != 1:
+		names[arg_c] = "input_left_" + str(sig.parameter_names[i])
 		arg_c = arg_c + 1
-	names[i+len(sig.input_initial)-1] = "output_" + str(sig.parameter_names[i])
-names[sig.input_length-1] = "input_pulse_length"
+	names[i+sig.num_args-1] = "input_right_" + str(sig.parameter_names[i])
+	names[i+2*sig.num_args-1] = "output_left_" + str(sig.parameter_names[i])
+	names[i+3*sig.num_args-1] = "output_right_" + str(sig.parameter_names[i])
+names[sig.num_args] = "input_pulse_length"
 	
 plt.cla()
 plt.clf()
 for i in range(0, len(params)-2):
-	if i != sig.input_shift:
-		plt.plot(params[sig.input_length],params[i],colors[i%len(colors)])
+	if i != 1:
+		plt.plot(params[sig.num_args+1],params[i],colors[i%len(colors)])
 plt.legend(names, loc = 'upper left')
 plt.show()
 

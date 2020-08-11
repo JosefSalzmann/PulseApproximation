@@ -7,7 +7,7 @@ from mpl_toolkits import mplot3d
 from timeit import default_timer as timer
 import sys
 from scipy.special import gamma, factorial
-
+import exp as exp
 
 import importlib
 sig = importlib.import_module("atan_taylor", package=None)
@@ -95,6 +95,20 @@ def trace_simple_exp(t, args):
 def trace_simple_exp_wr(t, *args):
 	return trace_simple_exp(t, args)
 
+def compensation_terms(args): # Calculates the number compensation terms needed (multiples of Vdd) such that the resulting trace is always between 0 and Vdd.
+	correction = 0
+	if args[0] < 0 and (len(args)/exp.num_args)%2 == 0: # first edge is falling
+		correction = 1
+	return (len(args)/exp.num_args)/2-correction
+	
+	
+def trace_sigmoids_exp(t, args): # Function of the whole trace. The number of sigmoids depends on the length of args. After evaluation the resulting value is compensated by the number of terms needed.
+	sum = 0
+	for i in range(0,len(args)//(exp.num_args)):
+		sum = sum + exp.sigmoid(t,args[exp.num_args*i:exp.num_args*(i+1)])
+	return Voltage*(sum-compensation_terms(args))
+
+Voltage = 1.2
 max_x = 10
 length = 1000
 
@@ -362,5 +376,123 @@ elif int(sys.argv[1]) == 5:
 
 	plt.title('Taylor approximation of tan(x)')
 	plt.legend(["tan(x)", "Approx. of 1st order", "Approx. of 3rd order", "Approx. of 5th order", "Approx. of 7th order"], loc = 'lower center')
+	#plt.text(-10, 1, "text")
+	plt.show()
+elif int(sys.argv[1]) == 6:
+
+	num_points = 1000
+	max_x = 0.7*10**-8
+
+	trace1in_args =  [1.29777,17.67613,-1.64637,25.95743]
+	trace2in_args = [1.29692,33.42815,-1.64167,41.75372]
+	trace3in_args = [1.30497,52.02741,-1.57476,57.55898]
+	trace4in_args = [1.29637,64.95243,-1.64558,75.39315]
+	trace1out_args =  [-1.64738,19.58087,1.30146,28.38617]
+	trace2out_args = [-1.62771,35.31412,1.29656,44.18237]
+	trace3out_args = [-1.65477,53.93538,1.29583,59.98719]
+	trace4out_args = [-1.62486,66.83676,1.29622,77.82236]
+
+	trace1in = [0.0]*num_points
+	trace2in = [0.0]*num_points
+	trace3in = [0.0]*num_points
+	trace4in = [0.0]*num_points
+	trace1out = [0.0]*num_points
+	trace2out = [0.0]*num_points
+	trace3out = [0.0]*num_points
+	trace4out = [0.0]*num_points
+	t_arr = [0.0]*num_points
+
+	t = 0.0
+	for i in range(0,num_points):
+		t_arr[i] = t
+		trace1in[i] = trace_sigmoids_exp(t, trace1in_args)
+		trace2in[i] = trace_sigmoids_exp(t, trace2in_args)
+		trace3in[i] = trace_sigmoids_exp(t, trace3in_args)
+		trace4in[i] = trace_sigmoids_exp(t, trace4in_args)
+		trace1out[i] = trace_sigmoids_exp(t, trace1out_args)
+		trace2out[i] = trace_sigmoids_exp(t, trace2out_args)
+		trace3out[i] = trace_sigmoids_exp(t, trace3out_args)
+		trace4out[i] = trace_sigmoids_exp(t, trace4out_args)
+		t+=max_x/num_points
+	
+	plt.cla()
+	plt.clf()
+	fig = plt.gcf()
+	fig.set_size_inches(12, 4)
+
+	linew = 1
+	
+		
+	plt.plot(t_arr,trace1in,'r-', linewidth=linew)
+	plt.plot(t_arr,trace2in,'g-', linewidth=linew)
+	plt.plot(t_arr,trace3in,'b-', linewidth=linew)
+	#plt.plot(t_arr,trace4in,'y-', linewidth=linew)
+	plt.plot(t_arr,trace1out,'r--', linewidth=linew)
+	plt.plot(t_arr,trace2out,'g--', linewidth=linew)
+	plt.plot(t_arr,trace3out,'b--', linewidth=linew)
+	#äplt.plot(t_arr,trace4out,'y--', linewidth=linew)
+	
+
+	plt.title('trace as pulses (input = lowside pulses, output = highside pulses')
+	plt.legend(["input pulse 1", "input pulse 2", "input pulse 3", "output pulse 1", "output pulse 2", "output pulse 3"], loc = 'center left')
+	#plt.text(-10, 1, "text")
+	plt.show()
+elif int(sys.argv[1]) == 7:
+
+	num_points = 1000
+	max_x = 0.7*10**-8
+
+	trace1in_args =  [-1.64637,25.95743,1.29692,33.42815]
+	trace2in_args = [-1.64167,41.75372,1.30497,52.02741]
+	trace3in_args = [-1.57476,57.55898,1.29637,64.95243]
+	trace4in_args = [-1.64558,75.39315,1.2964,86.44954]
+	trace1out_args =  [1.30146,28.38617,-1.62771,35.31412]
+	trace2out_args = [1.29656,44.18237,-1.65477,53.93538]
+	trace3out_args = [1.29583,59.98719,-1.62486,66.83676]
+	trace4out_args = [1.29622,77.82236,-1.64574,88.35374]
+
+	trace1in = [0.0]*num_points
+	trace2in = [0.0]*num_points
+	trace3in = [0.0]*num_points
+	trace4in = [0.0]*num_points
+	trace1out = [0.0]*num_points
+	trace2out = [0.0]*num_points
+	trace3out = [0.0]*num_points
+	trace4out = [0.0]*num_points
+	t_arr = [0.0]*num_points
+
+	t = 0.0
+	for i in range(0,num_points):
+		t_arr[i] = t
+		trace1in[i] = trace_sigmoids_exp(t, trace1in_args)
+		trace2in[i] = trace_sigmoids_exp(t, trace2in_args)
+		trace3in[i] = trace_sigmoids_exp(t, trace3in_args)
+		trace4in[i] = trace_sigmoids_exp(t, trace4in_args)
+		trace1out[i] = trace_sigmoids_exp(t, trace1out_args)
+		trace2out[i] = trace_sigmoids_exp(t, trace2out_args)
+		trace3out[i] = trace_sigmoids_exp(t, trace3out_args)
+		trace4out[i] = trace_sigmoids_exp(t, trace4out_args)
+		t+=max_x/num_points
+	
+	plt.cla()
+	plt.clf()
+	fig = plt.gcf()
+	fig.set_size_inches(12, 4)
+
+	linew = 1
+	
+		
+	plt.plot(t_arr,trace1in,'k-', linewidth=linew)
+	plt.plot(t_arr,trace2in,'y-', linewidth=linew)
+	#plt.plot(t_arr,trace3in,'b-', linewidth=linew)
+	#plt.plot(t_arr,trace4in,'y-', linewidth=linew)
+	plt.plot(t_arr,trace1out,'k--', linewidth=linew)
+	plt.plot(t_arr,trace2out,'y--', linewidth=linew)
+	#plt.plot(t_arr,trace3out,'b--', linewidth=linew)
+	#äplt.plot(t_arr,trace4out,'y--', linewidth=linew)
+	
+
+	plt.title('trace as pulses (input = highside pulses, output = lowside pulses')
+	plt.legend(["input pulse 1", "input pulse 2", "output pulse 1", "output pulse 2"], loc = 'center left')
 	#plt.text(-10, 1, "text")
 	plt.show()

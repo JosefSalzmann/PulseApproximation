@@ -7,18 +7,21 @@ from mpl_toolkits import mplot3d
 from timeit import default_timer as timer
 import importlib
 import sys
+import argparse
 
-# First parameter: path to the folder that should be fitted.
-# Second parameter: name of the model function.
-# Third parameter: Vdd.
-# Fourth parameter: Number of points used to fit the waveforms(every 10th item is usually enough to achieve the same fitting quality as with all data points)
+parser = argparse.ArgumentParser(description='')
+parser.add_argument('-t', help="path to folder that should be fitted using the fitting function")
+parser.add_argument('-f', help="path to fitting function")
+parser.add_argument('-v', help="Vdd")
+parser.add_argument('-n', help="number of points used to fit the waveforms(every 10th item is usually enough to achieve the same fitting quality as with all data points)")
 
+args = parser.parse_args()
 
-folderpath = sys.argv[1]
-sig_name = sys.argv[2]
+folderpath = args.t[1:len(args.t)] # remove blank from obtained string
+sig_name = args.f[1:len(args.f)]
 sig = importlib.import_module(sig_name, package=None)
-Voltage = float(sys.argv[3]) # 1.2 
-num_points = int(sys.argv[4]) # 500
+Voltage = float(args.v[1:len(args.v)]) # 1.2 
+num_points = int(args.n[1:len(args.n)]) # 500
 
 
 def pulse(t,args):

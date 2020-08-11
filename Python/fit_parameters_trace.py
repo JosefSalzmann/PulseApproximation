@@ -10,7 +10,7 @@ import sys
 import argparse
 
 
-parser = argparse.ArgumentParser(description='asdf')
+parser = argparse.ArgumentParser(description='Calculate the parameters of an arbitrary long trace using the transfer functions obtained from the single pulse fittings')
 parser.add_argument('-t', help="path to trace file that should be fitted using the transfer functions")
 parser.add_argument('-f', help="path to fitting function")
 parser.add_argument('-v', help="Vdd")
@@ -25,7 +25,6 @@ sig = importlib.import_module(sig_name, package=None)
 Voltage = float(args.v[1:len(args.v)]) # 1.2
 input_upside_pulse_meta_func = args.u[1:len(args.u)] # input pulse starts and ends at Vdd
 input_lowside_pulse_meta_func = args.l[1:len(args.l)] # input pulse starts and ends at 0V
-params_per_sig = len(sig.trace_initial)
 
 
 #########
@@ -35,15 +34,15 @@ Lin_approx_order = 3
 
 def compensation_terms(args): # Calculates the number compensation terms needed (multiples of Vdd) such that the resulting trace is always between 0 and Vdd.
 	correction = 0
-	if args[sig.trace_steepness] < 0 and (len(args)/params_per_sig)%2 == 0: # first edge is falling
+	if args[0] < 0 and (len(args)/sig.num_args)%2 == 0: # first edge is falling
 		correction = 1
-	return (len(args)/params_per_sig)/2-correction
+	return (len(args)/sig.num_args)/2-correction
 	
 	
 def trace_sigmoids(t, args): # Function of the whole trace. The number of sigmoids depends on the length of args. After evaluation the resulting value is compensated by the number of terms needed.
 	sum = 0
-	for i in range(0,len(args)//len(sig.trace_initial)):
-		sum = sum + sig.sigmoid(t,args[len(sig.trace_initial)*i:len(sig.trace_initial)*(i+1)])
+	for i in range(0,len(args)//(sig.num_args)):
+		sum = sum + sig.sigmoid(t,args[sig.num_args*i:sig.num_args*(i+1)])
 	return Voltage*(sum-compensation_terms(args))
 	
 def trace_sigmoids_wr(t, *args): # Wrapper function which the fitting algorithm can access.
@@ -52,7 +51,7 @@ def trace_sigmoids_wr(t, *args): # Wrapper function which the fitting algorithm 
 def meta_func(X,args): # function in the form of f(x,X_0,...,X_n) = X_0 + x*X_1 + x*X_1^2 + ... + x*X_1^j + x*X_2 + ... + x*X_n^j
 	ret_val = args[0]
 	arg_count = 1
-	for i in range(0, len(sig.input_initial)-1):
+	for i in range(0, 2*sig.num_args-1):
 		for j in range(1, Lin_approx_order+1):
 			ret_val = ret_val + args[arg_count]*(X[i]**j)
 			arg_count+=1
@@ -72,10 +71,10 @@ for i in range(0, len(line)):
 		endindex = i
 		break
 
-trace_parameters = [[0.0 for i in range(len(sig.trace_paramters_names))] for j in range(endindex-2)]
+trace_parameters = [[0.0 for i in range(sig.num_args)] for j in range(endindex-2)]
 for i in range(0, endindex-2):
 	params = line[i+2].split(",")
-	for j in range(0, len(sig.trace_paramters_names)):
+	for j in range(0, sig.num_args):
 		trace_parameters[i][j] = float(params[j])
 
 starts_with_rising_edge = True
@@ -87,24 +86,24 @@ else:
 	num_upside_pulses = len(trace_parameters)//2
 	starts_with_rising_edge = False
 
-upside_output_params = [[0.0 for i in range(len(sig.trace_paramters_names))] for j in range(num_lowside_pulses*2)]
-lowside_output_params = [[0.0 for i in range(len(sig.trace_paramters_names))] for j in range(num_upside_pulses*2)]
+upside_output_params = [[0.0 for i in range(sig.num_args)] for j in range(num_lowside_pulses*2)]
+lowside_output_params = [[0.0 for i in range(sig.num_args)] for j in range(num_upside_pulses*2)]
 
-final_output_params = [[0.0 for i in range(len(sig.trace_paramters_names))] for j in range(len(trace_parameters))]
+final_output_params = [[0.0 for i in range(sig.num_args)] for j in range(len(trace_parameters))]
 
 if starts_with_rising_edge:
 	for i in range(0, num_lowside_pulses):
 		X = [trace_parameters[i*2][0], trace_parameters[i*2+1][0], trace_parameters[i*2+1][1] - trace_parameters[i*2][1]]
-		for j in range(0, len(sig.trace_paramters_names)):
+		for j in range(0, sig.num_args):
 			upside_output_params[i*2][j] = meta_func(X, input_lowside_tr_fnc_params[j])
-			upside_output_params[i*2+1][j] = meta_func(X, input_lowside_tr_fnc_params[j+len(sig.trace_paramters_names)])
+			upside_output_params[i*2+1][j] = meta_func(X, input_lowside_tr_fnc_params[j+sig.num_args])
 		upside_output_params[i*2][1] = trace_parameters[i*2][1] + upside_output_params[i*2][1]
 		upside_output_params[i*2+1][1] = upside_output_params[i*2][1] + upside_output_params[i*2+1][1]
 	for i in range(0, num_upside_pulses):
 		X = [trace_parameters[i*2+1][0], trace_parameters[i*2+2][0], trace_parameters[i*2+2][1] - trace_parameters[i*2+1][1]]
-		for j in range(0, len(sig.trace_paramters_names)):
+		for j in range(0, sig.num_args):
 			lowside_output_params[i*2][j] = meta_func(X, input_upside_tr_fnc_params[j])
-			lowside_output_params[i*2+1][j] = meta_func(X, input_upside_tr_fnc_params[j+len(sig.trace_paramters_names)])
+			lowside_output_params[i*2+1][j] = meta_func(X, input_upside_tr_fnc_params[j+sig.num_args])
 		lowside_output_params[i*2][1] = trace_parameters[i*2+1][1] + lowside_output_params[i*2][1]
 		lowside_output_params[i*2+1][1] = lowside_output_params[i*2][1] + lowside_output_params[i*2+1][1]
 	
@@ -134,7 +133,7 @@ for i in range(0, len(final_output_params)):
 
 
 
-path = "..\\WaveformData\\t4_traces\\inv_t4_invSim_Traces.dat"
+path = "..\\WaveformData\\t4_traces\\inv_t4_invSim_820_200Traces.dat"
 data = aux.read_file(path, sys.maxsize) # Read the given file in its full length.
 data_reduced = aux.read_file(path, len(data[0])//10) # Read every tenth item of the given file.
 
@@ -165,10 +164,10 @@ output_fitting_err = aux.calc_rms_error_func(trace_sigmoids, output_param_array,
 plt.text(0, Voltage/8, "In  RMSE: " + str(round(input_fitting_err,5)) + "\nOut RMSE: " + str(round(output_fitting_err,5)),family="monospace")
 file_name = path.split("/")[len(path.split("/"))-1]
 title = file_name[:len(file_name)-4]
-plt.title(title)
-plt.legend(["Input","Input fitting","Input fitting error", "Output","Output fitting","Output fitting error"], loc = 'center left')
+plt.title(title + " fitting using transfer functions")
+plt.legend(["Input","Output","Output fitting from transfer functions", "fitting error"], loc = 'center left')
 imgpath = path[:len(path)-4]
 plt.ylabel("Voltage [V]")
 plt.xlabel("Time [s]")
-#plt.savefig(imgpath + "_fitting.svg")
+plt.savefig(imgpath + "_fitting.svg")
 plt.show()

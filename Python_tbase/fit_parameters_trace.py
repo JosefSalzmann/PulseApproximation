@@ -22,7 +22,7 @@ parser.add_argument('-l', help="path to transfer function with lowside pulse as 
 args = parser.parse_args()
 
 filepath = args.t[1:len(args.t)] # remove blank from obtained string 
-filepath = dir_path + "/" + dir_path
+filepath = dir_path + "/" + filepath
 sig_name = args.f[1:len(args.f)]
 sig = importlib.import_module(sig_name, package=None)
 Voltage = float(args.v[1:len(args.v)]) # 1.2
@@ -31,7 +31,7 @@ input_lowside_pulse_meta_func = args.l[1:len(args.l)] # input pulse starts and e
 
 
 #########
-Lin_approx_order = 3
+Lin_approx_order = 2
 #########
 
 
@@ -90,34 +90,40 @@ else:
 	starts_with_rising_edge = False
 
 current_edge_is_rising = not starts_with_rising_edge
+first_output_transition_str = line[endindex+3].split(",")
 
 
-upside_output_params = [[0.0 for i in range(sig.num_args)] for j in range(num_lowside_pulses*2)]
-lowside_output_params = [[0.0 for i in range(sig.num_args)] for j in range(num_upside_pulses*2)]
+# upside_output_params = [[0.0 for i in range(sig.num_args)] for j in range(num_lowside_pulses*2)]
+# lowside_output_params = [[0.0 for i in range(sig.num_args)] for j in range(num_upside_pulses*2)]
 
-final_output_params = [[0.0 for i in range(sig.num_args)] for j in range(len(trace_parameters))]
+final_output_params = [[0.0 for i in range(sig.num_args)]]
 
-if starts_with_rising_edge:
-	for i in range(0, num_lowside_pulses):
-		X = [trace_parameters[i*2][0], trace_parameters[i*2+1][0], trace_parameters[i*2+1][1] - trace_parameters[i*2][1]]
+for i in range(0, sig.num_args):
+	final_output_params[0][i] = float(first_output_transition_str[i])
+
+for i in range(1, len(trace_parameters)):
+	T = trace_parameters[i][1] - final_output_params[i-1][1]
+	input_parameters = [0.0 for i in range(2*sig.num_args-1)]
+	argc = 0
+	for j in range(0, sig.num_args):
+		if j != 1:
+			input_parameters[argc] = trace_parameters[i][j]
+		else:
+			argc+=1
+		input_parameters[sig.num_args+j-1] = final_output_params[i-1][j]
+	input_parameters[sig.num_args] = T
+	output_parameters = [0.0 for i in range(sig.num_args)]
+
+	if not current_edge_is_rising:
 		for j in range(0, sig.num_args):
-			upside_output_params[i*2][j] = meta_func(X, input_lowside_tr_fnc_params[j])
-			upside_output_params[i*2+1][j] = meta_func(X, input_lowside_tr_fnc_params[j+sig.num_args])
-		upside_output_params[i*2][1] = trace_parameters[i*2][1] + upside_output_params[i*2][1]
-		upside_output_params[i*2+1][1] = upside_output_params[i*2][1] + upside_output_params[i*2+1][1]
-	for i in range(0, num_upside_pulses):
-		X = [trace_parameters[i*2+1][0], trace_parameters[i*2+2][0], trace_parameters[i*2+2][1] - trace_parameters[i*2+1][1]]
+			output_parameters[j] = meta_func(input_parameters, input_lowside_tr_fnc_params[j])
+	else:
 		for j in range(0, sig.num_args):
-			lowside_output_params[i*2][j] = meta_func(X, input_upside_tr_fnc_params[j])
-			lowside_output_params[i*2+1][j] = meta_func(X, input_upside_tr_fnc_params[j+sig.num_args])
-		lowside_output_params[i*2][1] = trace_parameters[i*2+1][1] + lowside_output_params[i*2][1]
-		lowside_output_params[i*2+1][1] = lowside_output_params[i*2][1] + lowside_output_params[i*2+1][1]
-	
-	final_output_params[0] = upside_output_params[0]
-	for i in range(1, num_upside_pulses*2+1):
-		for j in range(0, len(upside_output_params[0])):
-			final_output_params[i][j] = (upside_output_params[i][j] + lowside_output_params[i-1][j])/2
-	final_output_params[num_upside_pulses*2+1] = upside_output_params[num_upside_pulses*2+1]	
+			output_parameters[j] = meta_func(input_parameters, input_upside_tr_fnc_params[j])
+
+	output_parameters[1]+=final_output_params[i-1][1]
+	final_output_params.append(output_parameters)
+	current_edge_is_rising = not current_edge_is_rising
 
 output_param_array = [0.0 for i in range(len(final_output_params)*2)]
 for i in range(0, len(final_output_params)):
@@ -139,7 +145,7 @@ for i in range(0, len(final_output_params)):
 
 
 
-path = "..\\WaveformData\\t4_traces\\inv_t4_invSim_660_200Traces.dat"
+path = dir_path + "/../WaveformData/t4_traces/inv_t4_invSim_520_200Traces.dat"
 data = aux.read_file(path, sys.maxsize) # Read the given file in its full length.
 data_reduced = aux.read_file(path, len(data[0])//10) # Read every tenth item of the given file.
 
@@ -147,8 +153,6 @@ approx_out = [0.0]*len(data_reduced[0])
 
 output_fitting_error = [0.0]*len(data_reduced[0])
 for i in range(0,len(data_reduced[0])): # Calculate the fitted curves.
-	if i == 9102:
-		asdf = 0
 	approx_out[i] = trace_sigmoids(data_reduced[0][i], output_param_array)
 	output_fitting_error[i] = approx_out[i] - data_reduced[2][i]
 # Draw a picture of the original traces and the fitted curves.	

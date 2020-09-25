@@ -60,8 +60,8 @@ def meta_func(X,args): # function in the form of f(x,X_0,...,X_n) = X_0 + x*X_1 
 			arg_count+=1
 	return ret_val
 
-input_upside_tr_fnc_params = aux.red_transfer_fnc_parameters(dir_path + "/" + input_upside_pulse_meta_func)
-input_lowside_tr_fnc_params = aux.red_transfer_fnc_parameters(dir_path + "/" + input_lowside_pulse_meta_func)
+input_upside_tr_fnc_params = aux.read_transfer_fnc_parameters(dir_path + "/" + input_upside_pulse_meta_func)
+input_lowside_tr_fnc_params = aux.read_transfer_fnc_parameters(dir_path + "/" + input_lowside_pulse_meta_func)
 
 
 # read trace file parameters

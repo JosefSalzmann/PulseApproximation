@@ -1,6 +1,7 @@
 import auxiliary as aux
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 from scipy import optimize
 from os import walk
 from mpl_toolkits import mplot3d
@@ -8,6 +9,8 @@ from timeit import default_timer as timer
 import importlib
 import sys
 import argparse
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('-t', help="path to folder that should be fitted using the fitting function")
@@ -184,11 +187,13 @@ def get_params(visualize, path): # Fit a single file and return the fitting para
 	return ret
 
 f = []
-for (dirpath, dirnames, filenames) in walk(folderpath):
+for (dirpath, dirnames, filenames) in walk(dir_path + "/" + folderpath):
     f = filenames
     break
 
-fw = open(folderpath + "/fitting_parameters.txt", "w+")
+fw = open(dir_path + "/" + folderpath + "/fitting_parameters.txt", "w+")
+#fw = open("/home/josef/dev/PulseApproximation/WaveformData/t4_d/fitting_parameters.txt", "w+")
+
 input_param_names = ['']*(2*sig.num_args)
 output_param_names = ['']*(2*sig.num_args)
 for i in range(0,sig.num_args):
@@ -209,7 +214,7 @@ max_error = [0]*2
 count = 0
 for file in filenames: # Iterate through every file in the specified folder and fit the .dat files.
 	if file.split(".")[1] == "dat":
-		res = get_params(True, folderpath + "/" + file)
+		res = get_params(True, dir_path + "/" + folderpath + "/" + file)
 		
 		sum_of_error[0] = sum_of_error[0] + res[len(res)-2]
 		sum_of_error[1] = sum_of_error[1] + res[len(res)-1]

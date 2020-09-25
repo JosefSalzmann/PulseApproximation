@@ -56,7 +56,7 @@ def calc_rms_error_data(original, fitted):
 	sq_error = np.subtract(original,fitted)**2	
 	return np.sqrt(sum(sq_error)/len(sq_error))
 
-def red_transfer_fnc_parameters(path):
+def read_transfer_fnc_parameters(path):
 	f = open(path, "r")
 	fr = f.read()
 	line = fr.split("\n")

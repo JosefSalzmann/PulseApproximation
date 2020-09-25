@@ -8,6 +8,8 @@ import classes as cl
 import importlib
 import sys
 import argparse
+import os
+
 
 parser = argparse.ArgumentParser(description='Generate transfer functions (on pulse base) using the fitting the values of fitting.py')
 parser.add_argument('-t', help="path to folder of which the transfer functions should be generated")
@@ -18,7 +20,10 @@ parser.add_argument('-a', help="approximation order (3 is usually enough)")
 args = parser.parse_args()
 
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 folderpath = args.t[1:len(args.t)] # remove blank from obtained string
+folderpath = dir_path + "/" + folderpath
 sig_name = args.f[1:len(args.f)]
 sig = importlib.import_module(sig_name, package=None)
 Voltage = float(args.v[1:len(args.v)]) # 1.2

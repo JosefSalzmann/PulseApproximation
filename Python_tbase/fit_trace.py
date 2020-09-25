@@ -4,6 +4,10 @@ import matplotlib.pyplot as plt
 from scipy import optimize
 import sys
 import importlib
+import os
+
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # First parameter: path to the file that should be fitted.
 # Second parameter: name of the model function.
@@ -148,7 +152,7 @@ plt.savefig(imgpath + "_fitting.svg")
 
 # Write the calculated parameters into a csv-file.
 folderpath = path[0:len(path)-4]
-fw = open(folderpath + "_fitting.csv", "w+")
+fw = open(dir_path + "/" + folderpath + "_fitting.csv", "w+")
 
 parameter_string = []
 for i in range(0,len(sig.trace_initial)-1):

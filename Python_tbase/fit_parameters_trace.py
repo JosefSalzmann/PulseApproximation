@@ -8,7 +8,9 @@ import classes as cl
 import importlib
 import sys
 import argparse
+import os
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 parser = argparse.ArgumentParser(description='Calculate the parameters of an arbitrary long trace using the transfer functions obtained from the single pulse fittings')
 parser.add_argument('-t', help="path to trace file that should be fitted using the transfer functions")
@@ -20,6 +22,7 @@ parser.add_argument('-l', help="path to transfer function with lowside pulse as 
 args = parser.parse_args()
 
 filepath = args.t[1:len(args.t)] # remove blank from obtained string 
+filepath = dir_path + "/" + dir_path
 sig_name = args.f[1:len(args.f)]
 sig = importlib.import_module(sig_name, package=None)
 Voltage = float(args.v[1:len(args.v)]) # 1.2
@@ -57,8 +60,8 @@ def meta_func(X,args): # function in the form of f(x,X_0,...,X_n) = X_0 + x*X_1 
 			arg_count+=1
 	return ret_val
 
-input_upside_tr_fnc_params = aux.red_transfer_fnc_parameters(input_upside_pulse_meta_func)
-input_lowside_tr_fnc_params = aux.red_transfer_fnc_parameters(input_lowside_pulse_meta_func)
+input_upside_tr_fnc_params = aux.red_transfer_fnc_parameters(dir_path + "/" + input_upside_pulse_meta_func)
+input_lowside_tr_fnc_params = aux.red_transfer_fnc_parameters(dir_path + "/" + input_lowside_pulse_meta_func)
 
 
 # read trace file parameters

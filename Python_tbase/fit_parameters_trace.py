@@ -89,6 +89,8 @@ else:
 	num_upside_pulses = len(trace_parameters)//2
 	starts_with_rising_edge = False
 
+current_edge_is_rising = not starts_with_rising_edge
+
 upside_output_params = [[0.0 for i in range(sig.num_args)] for j in range(num_lowside_pulses*2)]
 lowside_output_params = [[0.0 for i in range(sig.num_args)] for j in range(num_upside_pulses*2)]
 

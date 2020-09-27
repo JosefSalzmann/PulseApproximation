@@ -98,7 +98,7 @@ for i in range(0,line_cnt):
 		else:
 			argc = argc + 1
 			function_input_params[sig.num_args+j-1][i] = params[j+sig.num_args][i]-params[j+2*sig.num_args][i]
-			function_output_params[j][i] = params[j+3*sig.num_args][i]-params[j+2*sig.num_args][i]
+			function_output_params[j][i] = params[j+3*sig.num_args][i]-params[j+1*sig.num_args][i]
 
 def meta_func(X,args): # function in the form of f(x,X_0,...,X_n) = X_0 + x*X_1 + x*X_1^2 + ... + x*X_1^j + x*X_2 + ... + x*X_n^j
 	ret_val = args[0]
@@ -165,7 +165,7 @@ for i in range(0, sig.num_args):
 		meta_fittings[i][j] = meta_func(input_params_fitting[j], meta_params[i])		
 
 for i in range(0,count):
-	meta_fittings[1][i]+=params[1+2*sig.num_args][i]
+	meta_fittings[1][i]+=params[1+1*sig.num_args][i]
 		
 fitting_sq_errors = [[0 for i in range(count)] for i in range(2*sig.num_args)]
 for i in range(0, sig.num_args):

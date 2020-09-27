@@ -121,7 +121,7 @@ for i in range(1, len(trace_parameters)):
 		for j in range(0, sig.num_args):
 			output_parameters[j] = meta_func(input_parameters, input_upside_tr_fnc_params[j])
 
-	output_parameters[1]+=final_output_params[i-1][1]
+	output_parameters[1]+=trace_parameters[i][1]
 	final_output_params.append(output_parameters)
 	current_edge_is_rising = not current_edge_is_rising
 
@@ -145,7 +145,7 @@ for i in range(0, len(final_output_params)):
 
 
 
-path = dir_path + "/../WaveformData/t4_traces/inv_t4_invSim_520_200Traces.dat"
+path = dir_path + "/../WaveformData/t4_traces/inv_t4_invSim_720_200Traces.dat"
 data = aux.read_file(path, sys.maxsize) # Read the given file in its full length.
 data_reduced = aux.read_file(path, len(data[0])//10) # Read every tenth item of the given file.
 

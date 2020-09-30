@@ -8,8 +8,11 @@ from timeit import default_timer as timer
 import sys
 from scipy.special import gamma, factorial
 import exp as exp
-
 import importlib
+import os
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 sig = importlib.import_module("atan_taylor", package=None)
 
 tan_taylor_coeffs_odd = [	1.000000000000000, 0.333333333333333, 0.133333333333333, 
@@ -258,7 +261,7 @@ elif int(sys.argv[1]) == 3:
 	plt.show()
 elif int(sys.argv[1]) == 4:
 
-	path = "../WaveformData/t4_traces/inv_t4_invSim_Traces.dat"
+	path = dir_path + "/../WaveformData/t4_traces/inv_t4_invSim_Traces.dat"
 	data = aux.read_file(path, 100000)
 	
 	first_der = [[0.0]*len(data[0]) for i in range(3)]
@@ -380,119 +383,110 @@ elif int(sys.argv[1]) == 5:
 	plt.show()
 elif int(sys.argv[1]) == 6:
 
-	num_points = 1000
-	max_x = 0.7*10**-8
+	path = dir_path + "/../WaveformData/t4_d/inv_t4_d000740000Traces.dat"
+	data = aux.read_file(path, 10000)
 
-	trace1in_args =  [1.29777,17.67613,-1.64637,25.95743]
-	trace2in_args = [1.29692,33.42815,-1.64167,41.75372]
-	trace3in_args = [1.30497,52.02741,-1.57476,57.55898]
-	trace4in_args = [1.29637,64.95243,-1.64558,75.39315]
-	trace1out_args =  [-1.64738,19.58087,1.30146,28.38617]
-	trace2out_args = [-1.62771,35.31412,1.29656,44.18237]
-	trace3out_args = [-1.65477,53.93538,1.29583,59.98719]
-	trace4out_args = [-1.62486,66.83676,1.29622,77.82236]
-
-	trace1in = [0.0]*num_points
-	trace2in = [0.0]*num_points
-	trace3in = [0.0]*num_points
-	trace4in = [0.0]*num_points
-	trace1out = [0.0]*num_points
-	trace2out = [0.0]*num_points
-	trace3out = [0.0]*num_points
-	trace4out = [0.0]*num_points
-	t_arr = [0.0]*num_points
-
-	t = 0.0
-	for i in range(0,num_points):
-		t_arr[i] = t
-		trace1in[i] = trace_sigmoids_exp(t, trace1in_args)
-		trace2in[i] = trace_sigmoids_exp(t, trace2in_args)
-		trace3in[i] = trace_sigmoids_exp(t, trace3in_args)
-		trace4in[i] = trace_sigmoids_exp(t, trace4in_args)
-		trace1out[i] = trace_sigmoids_exp(t, trace1out_args)
-		trace2out[i] = trace_sigmoids_exp(t, trace2out_args)
-		trace3out[i] = trace_sigmoids_exp(t, trace3out_args)
-		trace4out[i] = trace_sigmoids_exp(t, trace4out_args)
-		t+=max_x/num_points
-	
 	plt.cla()
 	plt.clf()
+
 	fig = plt.gcf()
-	fig.set_size_inches(12, 4)
+	fig.set_size_inches(8, 6)
 
-	linew = 1
-	
-		
-	plt.plot(t_arr,trace1in,'r-', linewidth=linew)
-	plt.plot(t_arr,trace2in,'g-', linewidth=linew)
-	plt.plot(t_arr,trace3in,'b-', linewidth=linew)
-	#plt.plot(t_arr,trace4in,'y-', linewidth=linew)
-	plt.plot(t_arr,trace1out,'r--', linewidth=linew)
-	plt.plot(t_arr,trace2out,'g--', linewidth=linew)
-	plt.plot(t_arr,trace3out,'b--', linewidth=linew)
-	#äplt.plot(t_arr,trace4out,'y--', linewidth=linew)
-	
+	output_first_edge_index = 0
+	input_second_edge_index = 0
+	output_second_edge_index = 0
 
-	plt.title('trace as pulses (input = lowside pulses, output = highside pulses')
-	plt.legend(["input pulse 1", "input pulse 2", "input pulse 3", "output pulse 1", "output pulse 2", "output pulse 3"], loc = 'center left')
+	for i in range(0, len(data[0])):
+		data[0][i]*=10**9
+		if output_first_edge_index == 0 and data[2][i] >= 0.6:
+			output_first_edge_index = i
+		if output_first_edge_index != 0 and input_second_edge_index == 0 and data[1][i] >= 0.6:
+			input_second_edge_index = i
+		if output_first_edge_index != 0 and output_second_edge_index == 0 and data[2][i] <= 0.6:
+			output_second_edge_index = i
+
+	linew = 1.5
+	
+	input_steepness = (data[1][input_second_edge_index+1]-data[1][input_second_edge_index-1]) / (data[0][input_second_edge_index+1]-data[0][input_second_edge_index-1])
+
+	input_steepness_plt = [0.0]*1372
+	for i in range(0, len(input_steepness_plt)):
+		input_steepness_plt[i] = data[0][i]*input_steepness
+
+
+	output_steepness = (data[2][output_first_edge_index+1]-data[2][output_first_edge_index-1]) / (data[0][output_first_edge_index+1]-data[0][output_first_edge_index-1])
+	output_steepness_plt = [0.0]*1372
+	for i in range(0, len(output_steepness_plt)):
+		output_steepness_plt[i] = data[0][i]*output_steepness
+	
+	plt.plot(data[0],data[1],'r-', linewidth=linew)
+	plt.plot(data[0],data[2],'g-', linewidth=linew)
+	plt.plot(data[0][int(output_first_edge_index-len(output_steepness_plt)/2):int(output_first_edge_index+len(output_steepness_plt)/2)],output_steepness_plt,'k--', linewidth=1.5)
+	plt.plot(data[0][int(input_second_edge_index-len(input_steepness_plt)/2):int(input_second_edge_index+len(input_steepness_plt)/2)],input_steepness_plt,'k--', linewidth=1.5)
+	plt.plot([data[0][output_first_edge_index]]*2, [0.35,0.6],'k-', linewidth=1.2)
+	plt.plot([data[0][input_second_edge_index]]*2, [0.35,0.6],'k-', linewidth=1.2)
+	
+	plt.arrow(data[0][output_first_edge_index+400], 0.4, data[0][input_second_edge_index-150]-data[0][output_first_edge_index+400], 0, width=0.0005, head_width=data[0][150]/2, head_length=data[0][150], fc='k', ec='k', linestyle=('-'), capstyle='round')
+	plt.arrow(data[0][input_second_edge_index-400], 0.4, -(data[0][input_second_edge_index-150]-data[0][output_first_edge_index+400]), 0, width=0.0005, head_width=data[0][150]/2, head_length=data[0][150], fc='k', ec='k', linestyle=('-'), capstyle='round')
+
+	plt.text(data[0][(input_second_edge_index+output_first_edge_index)//2-50],0.41,r'$T$')
+
+	plt.text(data[0][output_first_edge_index-800],0.6,r'$so_{n-1}$')
+	plt.text(data[0][input_second_edge_index-470],0.6,r'$si_{n}$')
+
+	plt.ylabel("Voltage [V]")
+	plt.xlabel("Time [ns]")
+	plt.title('')
+	plt.legend(["Input", "Output"], loc = 'center left')
 	#plt.text(-10, 1, "text")
 	plt.show()
+
 elif int(sys.argv[1]) == 7:
 
-	num_points = 1000
-	max_x = 0.7*10**-8
+	path = dir_path + "/../WaveformData/t4_d/inv_t4_d000740000Traces.dat"
+	data = aux.read_file(path, 10000)
 
-	trace1in_args =  [-1.64637,25.95743,1.29692,33.42815]
-	trace2in_args = [-1.64167,41.75372,1.30497,52.02741]
-	trace3in_args = [-1.57476,57.55898,1.29637,64.95243]
-	trace4in_args = [-1.64558,75.39315,1.2964,86.44954]
-	trace1out_args =  [1.30146,28.38617,-1.62771,35.31412]
-	trace2out_args = [1.29656,44.18237,-1.65477,53.93538]
-	trace3out_args = [1.29583,59.98719,-1.62486,66.83676]
-	trace4out_args = [1.29622,77.82236,-1.64574,88.35374]
-
-	trace1in = [0.0]*num_points
-	trace2in = [0.0]*num_points
-	trace3in = [0.0]*num_points
-	trace4in = [0.0]*num_points
-	trace1out = [0.0]*num_points
-	trace2out = [0.0]*num_points
-	trace3out = [0.0]*num_points
-	trace4out = [0.0]*num_points
-	t_arr = [0.0]*num_points
-
-	t = 0.0
-	for i in range(0,num_points):
-		t_arr[i] = t
-		trace1in[i] = trace_sigmoids_exp(t, trace1in_args)
-		trace2in[i] = trace_sigmoids_exp(t, trace2in_args)
-		trace3in[i] = trace_sigmoids_exp(t, trace3in_args)
-		trace4in[i] = trace_sigmoids_exp(t, trace4in_args)
-		trace1out[i] = trace_sigmoids_exp(t, trace1out_args)
-		trace2out[i] = trace_sigmoids_exp(t, trace2out_args)
-		trace3out[i] = trace_sigmoids_exp(t, trace3out_args)
-		trace4out[i] = trace_sigmoids_exp(t, trace4out_args)
-		t+=max_x/num_points
-	
 	plt.cla()
 	plt.clf()
+
 	fig = plt.gcf()
-	fig.set_size_inches(12, 4)
+	fig.set_size_inches(8, 6)
 
-	linew = 1
-	
-		
-	plt.plot(t_arr,trace1in,'k-', linewidth=linew)
-	plt.plot(t_arr,trace2in,'y-', linewidth=linew)
-	#plt.plot(t_arr,trace3in,'b-', linewidth=linew)
-	#plt.plot(t_arr,trace4in,'y-', linewidth=linew)
-	plt.plot(t_arr,trace1out,'k--', linewidth=linew)
-	plt.plot(t_arr,trace2out,'y--', linewidth=linew)
-	#plt.plot(t_arr,trace3out,'b--', linewidth=linew)
-	#äplt.plot(t_arr,trace4out,'y--', linewidth=linew)
-	
+	output_first_edge_index = 0
+	input_second_edge_index = 0
+	output_second_edge_index = 0
 
-	plt.title('trace as pulses (input = highside pulses, output = lowside pulses')
-	plt.legend(["input pulse 1", "input pulse 2", "output pulse 1", "output pulse 2"], loc = 'center left')
+	for i in range(0, len(data[0])):
+		data[0][i]*=10**9
+		if output_first_edge_index == 0 and data[2][i] >= 0.6:
+			output_first_edge_index = i
+		if output_first_edge_index != 0 and input_second_edge_index == 0 and data[1][i] >= 0.6:
+			input_second_edge_index = i
+		if output_first_edge_index != 0 and output_second_edge_index == 0 and data[2][i] <= 0.6:
+			output_second_edge_index = i
+
+	linew = 1.5
+	
+	output_steepness = (data[2][output_second_edge_index+1]-data[2][output_second_edge_index-1]) / (data[0][output_second_edge_index+1]-data[0][output_second_edge_index-1])
+	output_steepness_plt = [0.0]*1100
+	for i in range(0, len(output_steepness_plt)):
+		output_steepness_plt[i] = 1.2+data[0][i]*output_steepness
+	
+	plt.plot(data[0],data[1],'r-', linewidth=linew)
+	plt.plot(data[0],data[2],'g-', linewidth=linew)
+	plt.plot(data[0][int(output_second_edge_index-len(output_steepness_plt)/2):int(output_second_edge_index+len(output_steepness_plt)/2)],output_steepness_plt,'k--', linewidth=1.5)
+	plt.plot([data[0][input_second_edge_index]]*2, [0.35,0.6],'k-', linewidth=1.2)
+	plt.plot([data[0][output_second_edge_index]]*2, [0.35,0.6],'k-', linewidth=1.2)
+	
+	plt.arrow(data[0][input_second_edge_index+300], 0.4, data[0][output_second_edge_index-150]-data[0][input_second_edge_index+300], 0, width=0.0005, head_width=data[0][150]/2, head_length=data[0][150], fc='k', ec='k', linestyle=('-'), capstyle='round')
+	plt.arrow(data[0][output_second_edge_index-300], 0.4, -(data[0][output_second_edge_index-150]-data[0][input_second_edge_index+300]), 0, width=0.0005, head_width=data[0][150]/2, head_length=data[0][150], fc='k', ec='k', linestyle=('-'), capstyle='round')
+
+	plt.text(data[0][(input_second_edge_index+output_second_edge_index)//2-50],0.41,r'$D$')
+	plt.text(data[0][output_second_edge_index+50],0.6,r'$so_{n}$')
+
+	plt.ylabel("Voltage [V]")
+	plt.xlabel("Time [ns]")
+	plt.title('')
+	plt.legend(["Input", "Output"], loc = 'center left')
 	#plt.text(-10, 1, "text")
 	plt.show()

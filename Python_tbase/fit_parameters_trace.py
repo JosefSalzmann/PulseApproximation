@@ -21,13 +21,13 @@ parser.add_argument('-l', help="path to transfer function with lowside pulse as 
 
 args = parser.parse_args()
 
-filepath = args.t[1:len(args.t)] # remove blank from obtained string 
+filepath = args.t
 filepath = dir_path + "/" + filepath
-sig_name = args.f[1:len(args.f)]
+sig_name = args.f
 sig = importlib.import_module(sig_name, package=None)
-Voltage = float(args.v[1:len(args.v)]) # 1.2
-input_upside_pulse_meta_func = args.u[1:len(args.u)] # input pulse starts and ends at Vdd
-input_lowside_pulse_meta_func = args.l[1:len(args.l)] # input pulse starts and ends at 0V
+Voltage = float(args.v) # 1.2
+input_upside_pulse_meta_func = args.u # input pulse starts and ends at Vdd
+input_lowside_pulse_meta_func = args.l # input pulse starts and ends at 0V
 
 
 #########

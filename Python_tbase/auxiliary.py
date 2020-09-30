@@ -14,7 +14,7 @@ def read_file(path, num_points):
 	input = [0]*n
 	output = [0]*n
 	for i in range(0,n,1):
-		index = int(math.floor(len(line)/n)*i)
+		index = int(math.floor(len(line)/n*i))
 		number = line[index].split(" ")
 		time[i] = float(number[0])
 		input[i] = float(number[1])

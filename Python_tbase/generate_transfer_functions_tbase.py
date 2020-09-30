@@ -22,12 +22,12 @@ args = parser.parse_args()
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-folderpath = args.t[1:len(args.t)] # remove blank from obtained string
+folderpath = args.t # remove blank from obtained string
 folderpath = dir_path + "/" + folderpath
-sig_name = args.f[1:len(args.f)]
+sig_name = args.f
 sig = importlib.import_module(sig_name, package=None)
-Voltage = float(args.v[1:len(args.v)]) # 1.2
-Lin_approx_order = int(args.a[1:len(args.a)]) # 3
+Voltage = float(args.v) # 1.2
+Lin_approx_order = int(args.a) # 3
 
 
 

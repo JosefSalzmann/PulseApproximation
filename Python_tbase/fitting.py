@@ -20,11 +20,11 @@ parser.add_argument('-n', help="number of points used to fit the waveforms(every
 
 args = parser.parse_args()
 
-folderpath = args.t[1:len(args.t)] # remove blank from obtained string
-sig_name = args.f[1:len(args.f)]
+folderpath = args.t
+sig_name = args.f
 sig = importlib.import_module(sig_name, package=None)
-Voltage = float(args.v[1:len(args.v)]) # 1.2 
-num_points = int(args.n[1:len(args.n)]) # 500
+Voltage = float(args.v) # 1.2 
+num_points = int(args.n) # 500
 
 
 def pulse(t,args):
@@ -190,6 +190,8 @@ f = []
 for (dirpath, dirnames, filenames) in walk(dir_path + "/" + folderpath):
     f = filenames
     break
+
+f.sort()
 
 fw = open(dir_path + "/" + folderpath + "/fitting_parameters.txt", "w+")
 #fw = open("/home/josef/dev/PulseApproximation/WaveformData/t4_d/fitting_parameters.txt", "w+")

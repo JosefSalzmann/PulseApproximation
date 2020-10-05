@@ -1,7 +1,6 @@
 import auxiliary as aux
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 from scipy import optimize
 from os import walk
 from mpl_toolkits import mplot3d
@@ -9,6 +8,7 @@ from timeit import default_timer as timer
 import importlib
 import sys
 import argparse
+import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -93,15 +93,6 @@ def get_params(visualize, path): # Fit a single file and return the fitting para
 	input_params = optimize.curve_fit(pulse_wr, data[0], data[1], input_init, sigma = input_sigma, bounds = (input_lower_bound, input_upper_bound), maxfev=5000)
 	output_params = optimize.curve_fit(pulse_wr, data[0], data[2], output_init, sigma = output_sigma, bounds = (output_lower_bound, output_upper_bound), maxfev=5000)
 	
-	
-	#lowside_params = optimize.curve_fit(lowside_pulse_wr, data[0], data[lowside_index], input_init, sigma = input_sigma, bounds = (sig.input_lower_bound, sig.input_upper_bound), maxfev=5000)
-	#highside_params = optimize.curve_fit(highside_pulse_wr, data[0], data[highside_index], output_init, sigma = output_sigma, bounds = (sig.output_lower_bound, sig.output_upper_bound), maxfev=5000)
-	
-	
-	#lowside_fitting = [0]*len(data[0])
-	#highside_fitting = [0]*len(data[0])
-	
-	
 	input_fitting = [0]*len(data[0])
 	output_fitting = [0]*len(data[0])
 	input_fitting_error = [0]*len(data[0])
@@ -110,15 +101,6 @@ def get_params(visualize, path): # Fit a single file and return the fitting para
 	# Calculate the RMS error of the resulting function scaled by the operating voltage.
 	input_rms_error = aux.calc_rms_error_func(pulse, input_params[0], data[0], data[1])/Voltage
 	output_rms_error = aux.calc_rms_error_func(pulse, output_params[0], data[0], data[2])/Voltage
-	
-	#lowside_rms_error = aux.calc_rms_error_func(lowside_pulse, lowside_params[0], data[0], data[lowside_index])/Voltage
-	#highside_rms_error = aux.calc_rms_error_func(highside_pulse, highside_params[0], data[0], data[highside_index])/Voltage
-	
-	#input_rms_error = lowside_rms_error
-	#output_rms_error = highside_rms_error
-	#if lowside_index == 2:
-		#input_rms_error = highside_rms_error
-		#output_rms_error = lowside_rms_error
 
 	if visualize:
 		plt.cla()
@@ -128,14 +110,6 @@ def get_params(visualize, path): # Fit a single file and return the fitting para
 		for i in range(0,len(data[0])):
 			input_fitting[i] = pulse(data[0][i],input_params[0])
 			output_fitting[i] = pulse(data[0][i],output_params[0])
-			'''lowside_fitting[i] = lowside_pulse(data[0][i],lowside_params[0])
-			highside_fitting[i] = highside_pulse(data[0][i],highside_params[0])
-			if lowside_index == 1:
-				input_fitting_error[i] = lowside_fitting[i] - data[1][i]
-				output_fitting_error[i] = highside_fitting[i] - data[2][i]
-			else:
-				input_fitting_error[i] = highside_fitting[i] - data[1][i]
-				output_fitting_error[i] = lowside_fitting[i] - data[2][i]'''
 			input_fitting_error[i] = input_fitting[i] - data[1][i]
 			output_fitting_error[i] = output_fitting[i] - data[2][i]
 			
@@ -144,17 +118,9 @@ def get_params(visualize, path): # Fit a single file and return the fitting para
 		
 			
 		plt.plot(data[0],data[1],'r-', linewidth=linew)
-		'''if lowside_index == 1:
-			plt.plot(data[0],lowside_fitting,'r--', linewidth=linew)
-		else:
-			plt.plot(data[0],highside_fitting,'r--', linewidth=linew)'''
 		plt.plot(data[0],input_fitting,'r--', linewidth=linew)
 		plt.plot(data[0],input_fitting_error,'r-.', linewidth=linew)	
 		plt.plot(data[0],data[2],'g-', linewidth=linew)	
-		'''if lowside_index == 1:
-			plt.plot(data[0],highside_fitting,'g--', linewidth=linew)
-		else:
-			plt.plot(data[0],lowside_fitting,'g--', linewidth=linew)'''
 		plt.plot(data[0],output_fitting,'g--', linewidth=linew)
 		plt.plot(data[0],output_fitting_error,'g-.', linewidth=linew)	
 		
@@ -173,12 +139,6 @@ def get_params(visualize, path): # Fit a single file and return the fitting para
 	arr_len = len(input_params[0])
 	ret = [0]*(2*arr_len+2)
 	for i in range(0, arr_len):
-		'''if lowside_index == 1:
-			ret[i] = lowside_params[0][i]
-			ret[input_arr_len+i] = highside_params[0][i]
-		else:
-			ret[input_arr_len+i] = lowside_params[0][i]
-			ret[i] = highside_params[0][i]'''
 		ret[i] = input_params[0][i]
 		ret[arr_len+i] = output_params[0][i]
 	ret[arr_len*2] = input_rms_error
@@ -194,7 +154,6 @@ for (dirpath, dirnames, filenames) in walk(dir_path + "/" + folderpath):
 f.sort()
 
 fw = open(dir_path + "/" + folderpath + "/fitting_parameters.txt", "w+")
-#fw = open("/home/josef/dev/PulseApproximation/WaveformData/t4_d/fitting_parameters.txt", "w+")
 
 input_param_names = ['']*(2*sig.num_args)
 output_param_names = ['']*(2*sig.num_args)

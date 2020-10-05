@@ -138,14 +138,7 @@ for i in range(0, len(final_output_params)):
 
 
 
-
-
-
-
-
-
-
-path = dir_path + "/../WaveformData/t4_traces/inv_t4_invSim_720_200Traces.dat"
+path = dir_path + "/../WaveformData/t4_traces/inv_t4_invSim_820_200Traces.dat"
 data = aux.read_file(path, sys.maxsize) # Read the given file in its full length.
 data_reduced = aux.read_file(path, len(data[0])//10) # Read every tenth item of the given file.
 

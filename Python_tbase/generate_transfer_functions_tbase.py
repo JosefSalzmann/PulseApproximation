@@ -76,14 +76,6 @@ for i in range(0,line_cnt):
 	for j in range(0,line_len):
 		params[j][i] = dat_file_fittings[i].parameters[j]	
 
-'''
-for i in range(0,line_cnt):
-	for j in range(0,line_len):
-		if (j % sig.num_args) == 1 and j != sig.num_args+1:
-			params[j][i] = params[j][i] - params[sig.num_args+1][i]
-		elif j == 2*sig.num_args+1:
-			params[j][i] = params[sig.num_args+1][i] - params[j][i]'''
-# calculate T
 
 function_input_params = [[0.0 for i in range(line_cnt)] for j in range(2*sig.num_args-1)]
 function_output_params = [[0.0 for i in range(line_cnt)] for j in range(sig.num_args)]
@@ -141,9 +133,6 @@ for i in range(0, sig.num_args):
 	arg_count = 1
 	for j in range(0, 2*sig.num_args-1):
 		for k in range(1, Lin_approx_order+1):
-			#if(j == 2*sig.num_args-2 and k == Lin_approx_order):
-			#	print(str(meta_params[i][arg_count]) + "*" + names[j] + "^" + str(k))				
-			#else:
 			print(str(meta_params[i][arg_count]) + "*" + input_names[j] + "^" + str(k) + "+")
 			fw.write(input_names[j] + "," + str(k) +  "," + str(meta_params[i][arg_count]) + "\n")
 			arg_count+=1			

@@ -1,10 +1,8 @@
-Input parameters
+Input parameters,
 Steepness,Shift
 1.30257,17.67466
 -1.62069,24.32183
 1.28018,29.8844
--1.37151,37.75668
-1.05655,38.94415
 -1.65923,49.29538
 1.2889,55.25578
 -1.38074,67.1679
@@ -13,7 +11,7 @@ Steepness,Shift
 1.19924,90.03784
 -1.33665,93.63712
 Input compensations terms,6
-Output parameters
+Output parameters,
 Steepness,Shift
 -1.65342,19.57954
 1.2827,26.78407

@@ -7,10 +7,10 @@ parameter_names = ['steepness', 'shift']
 
 rising_initial = [1, 12]
 rising_lower_bound = [0,0]
-rising_upper_bound = [100, 25]
+rising_upper_bound = [10, 25]
 
 falling_initial = [-1, 12]
-falling_lower_bound = [-100, 0]
+falling_lower_bound = [-10, 0]
 falling_upper_bound = [0, 25]
 
 default_pulse_length = 1.0

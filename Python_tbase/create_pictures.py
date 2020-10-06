@@ -490,3 +490,17 @@ elif int(sys.argv[1]) == 7:
 	plt.legend(["Input", "Output"], loc = 'center left')
 	#plt.text(-10, 1, "text")
 	plt.show()
+elif int(sys.argv[1]) == 8:
+
+	path = dir_path + "/../WaveformData/t4_traces/inv_t4_d001000000_001000000_002000000.dat"
+	data = aux.read_file(path, 10000)
+
+	plt.cla()
+	plt.clf()
+
+	fig = plt.gcf()
+	fig.set_size_inches(8, 6)
+	linew = 1.5
+	plt.plot(data[0],data[1],'r-', linewidth=linew)
+	plt.plot(data[0],data[2],'g-', linewidth=linew)
+	plt.show()

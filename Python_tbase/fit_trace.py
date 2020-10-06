@@ -34,7 +34,7 @@ def main(path, sig_name, Voltage, generatePicture):
 				first_der[i] = first_der[i-1] # in that case the derivative is just interpolated using the previous value.
 
 		filter_size = 10
-		percent_in_range = 0.005
+		percent_in_range = 0.05
 		filter = [0.0]*filter_size
 		starts_at_Vdd = 0
 		next_edge_rising = True
@@ -42,7 +42,7 @@ def main(path, sig_name, Voltage, generatePicture):
 			starts_at_Vdd = 1
 			next_edge_rising = False
 		switching_points = []
-		min_height = 0.001
+		min_height = 0.0005
 		for i in range(0, len(trace)-filter_size): # Iterate through the derivative array and identify small portions (size of the filter) where the gradient is constant and not zero.
 			filter = first_der[i:i+filter_size]
 			if (np.sum(filter) > min_height*filter_size and next_edge_rising) or (np.sum(filter) < -1*min_height*filter_size and not next_edge_rising): # Check if the observed portion is not zero.

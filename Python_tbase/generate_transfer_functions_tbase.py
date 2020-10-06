@@ -16,6 +16,7 @@ parser.add_argument('-t', help="path to folder of which the transfer functions s
 parser.add_argument('-f', help="path to fitting function")
 parser.add_argument('-v', help="Vdd")
 parser.add_argument('-a', help="approximation order (3 is usually enough)")
+parser.add_argument('-p', '--p', help="generate and save picture of plot", action='store_true')
 
 args = parser.parse_args()
 
@@ -124,7 +125,7 @@ for i in range(0, sig.num_args):
 input_names[sig.num_args] = "T"
 
 
-fw = open(folderpath + "/meta_fittings.txt", "w+")
+fw = open(folderpath + "/transferFunctions.txt", "w+")
 for i in range(0, sig.num_args):
 	print(output_names[i] + "=")
 	fw.write(output_names[i] + "\n")
@@ -176,24 +177,25 @@ for i in range(0,count):
 	for j in range(0,sig.num_args):
 		meta_output_params[i][j+sig.num_args] = meta_fittings[j][i] 
 	
-for i in range(0, len(dat_file_content)):
-	meta_output_fitting = [0]*len(dat_file_content[i].time)
-	for j in range(0, len(dat_file_content[i].time)):
-		meta_output_fitting[j] = pulse(dat_file_content[i].time[j], meta_output_params[i])
-	plt.cla()
-	plt.clf()
-	fig = plt.gcf()
-	fig.set_size_inches(8, 6)
-	
-	linew = 1
-	plt.plot(dat_file_content[i].time, dat_file_content[i].input_pulse,'r-', linewidth=linew)
-	plt.plot(dat_file_content[i].time, dat_file_content[i].output_pulse,'g-', linewidth=linew)		
-	plt.plot(dat_file_content[i].time,meta_output_fitting,'b--', linewidth=linew)	
-	plt.text(0, Voltage/4, "Out RMSE: " + str(round(aux.calc_rms_error_data(dat_file_content[i].output_pulse,meta_output_fitting),5)),family="monospace")
-	plt.title(dat_file_content[i].file_name + " transfer function fitting")
-	plt.legend(["Input","Output", "Meta Output fitting"], loc = 'center left')
-	#plt.show()
-	path = folderpath + "/" + dat_file_content[i].file_name
-	imgpath = path[:len(path)-4]
-	plt.savefig(imgpath + "_Meta_fitting.png")
+if args.p:
+	for i in range(0, len(dat_file_content)):
+		meta_output_fitting = [0]*len(dat_file_content[i].time)
+		for j in range(0, len(dat_file_content[i].time)):
+			meta_output_fitting[j] = pulse(dat_file_content[i].time[j], meta_output_params[i])
+		plt.cla()
+		plt.clf()
+		fig = plt.gcf()
+		fig.set_size_inches(8, 6)
+		
+		linew = 1
+		plt.plot(dat_file_content[i].time, dat_file_content[i].input_pulse,'r-', linewidth=linew)
+		plt.plot(dat_file_content[i].time, dat_file_content[i].output_pulse,'g-', linewidth=linew)		
+		plt.plot(dat_file_content[i].time,meta_output_fitting,'b--', linewidth=linew)	
+		plt.text(0, Voltage/4, "Out RMSE: " + str(round(aux.calc_rms_error_data(dat_file_content[i].output_pulse,meta_output_fitting),5)),family="monospace")
+		plt.title(dat_file_content[i].file_name + " transfer function fitting")
+		plt.legend(["Input","Output", "Meta Output fitting"], loc = 'center left')
+		#plt.show()
+		path = folderpath + "/" + dat_file_content[i].file_name
+		imgpath = path[:len(path)-4]
+		plt.savefig(imgpath + "_transferFunctions_fitting.png")
 

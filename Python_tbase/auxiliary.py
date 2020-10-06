@@ -8,7 +8,7 @@ def read_file(path, num_points):
 	line = fr.split(";\n")
 	n = min(num_points, len(line))
 	line[0] = line[0][1:]
-	line[len(line)-1] = line[len(line)-1][:len(line[len(line)-1])-1]
+	line[len(line)-1] = line[len(line)-1].split("]")[0]
 	
 	time = [0]*n
 	input = [0]*n

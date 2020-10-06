@@ -18,6 +18,7 @@ parser.add_argument('-f', help="path to fitting function")
 parser.add_argument('-v', help="Vdd")
 parser.add_argument('-u', help="path to transfer function with upside pulse as input and lowside pulse as output")
 parser.add_argument('-l', help="path to transfer function with lowside pulse as input and upside pulse as output")
+parser.add_argument('-d', help="path to transfer dat-file that should be fitted, providing this argument will cause the program to save a picture.")
 
 args = parser.parse_args()
 
@@ -28,11 +29,8 @@ sig = importlib.import_module(sig_name, package=None)
 Voltage = float(args.v) # 1.2
 input_upside_pulse_meta_func = args.u # input pulse starts and ends at Vdd
 input_lowside_pulse_meta_func = args.l # input pulse starts and ends at 0V
+datfilepath = args.d
 
-
-#########
-Lin_approx_order = 2
-#########
 
 
 def compensation_terms(args): # Calculates the number compensation terms needed (multiples of Vdd) such that the resulting trace is always between 0 and Vdd.
@@ -63,6 +61,7 @@ def meta_func(X,args): # function in the form of f(x,X_0,...,X_n) = X_0 + x*X_1 
 input_upside_tr_fnc_params = aux.read_transfer_fnc_parameters(dir_path + "/" + input_upside_pulse_meta_func)
 input_lowside_tr_fnc_params = aux.read_transfer_fnc_parameters(dir_path + "/" + input_lowside_pulse_meta_func)
 
+Lin_approx_order = (len(input_lowside_tr_fnc_params[0])-1)//((sig.num_args*2)-1)
 
 # read trace file parameters
 f = open(filepath, "r")
@@ -138,7 +137,7 @@ for i in range(0, len(final_output_params)):
 
 
 
-path = dir_path + "/../WaveformData/t4_traces/inv_t4_invSim_820_200Traces.dat"
+path = dir_path + "/" + datfilepath
 data = aux.read_file(path, sys.maxsize) # Read the given file in its full length.
 data_reduced = aux.read_file(path, len(data[0])//10) # Read every tenth item of the given file.
 

@@ -107,7 +107,7 @@ for i in range(0, sig.num_args):
 	names[i+3*sig.num_args-1] = "output_right" + str(sig.parameter_names[i])
 names[2*sig.num_args-2] = "input_pulse_length" 
 
-fw = open(folderpath + "/meta_fittings.txt", "w+")
+fw = open(folderpath + "/transferFunctions.txt", "w+")
 for i in range(0, 2*sig.num_args):
 	print(names[2*sig.num_args-1+i] + "=")
 	fw.write(names[2*sig.num_args-1+i] + "\n")

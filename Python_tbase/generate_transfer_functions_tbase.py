@@ -88,8 +88,9 @@ for i in range(0,line_cnt):
 			function_input_params[argc][i] = params[j+sig.num_args][i]
 			function_input_params[sig.num_args+j-1][i] = params[j+2*sig.num_args][i]
 			function_output_params[j][i] = params[j+3*sig.num_args][i]
-		else:
 			argc = argc + 1
+		else:
+			
 			function_input_params[sig.num_args+j-1][i] = params[j+sig.num_args][i]-params[j+2*sig.num_args][i]
 			function_output_params[j][i] = params[j+3*sig.num_args][i]-params[j+1*sig.num_args][i]
 
@@ -100,7 +101,7 @@ fig = plt.gcf()
 fig.set_size_inches(8, 6)
 
 plt.scatter(function_input_params[2], function_input_params[1], s=2)
-plt.show()
+#plt.show()
 
 def meta_func(X,args): # function in the form of f(x,X_0,...,X_n) = X_0 + x*X_1 + x*X_1^2 + ... + x*X_1^j + x*X_2 + ... + x*X_n^j
 	ret_val = args[0]
@@ -127,7 +128,6 @@ argc = 0
 for i in range(0, sig.num_args):
 	if i != 1:
 		input_names[argc] = "input_" + str(sig.parameter_names[i])
-	else:
 		argc = argc + 1
 	input_names[sig.num_args-1+i] = "previous_output_" + str(sig.parameter_names[i])
 	output_names[i] = "output_" + str(sig.parameter_names[i])

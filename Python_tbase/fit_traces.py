@@ -5,7 +5,7 @@ from timeit import default_timer as timer
 
 transitionIndex = 0
 
-folderpath = "../WaveformData/t4_d_4t"
+folderpath = "../WaveformData/t4_d"
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 f = []
@@ -22,7 +22,6 @@ for file in filenames: # Iterate through every file in the specified folder and 
 
 end = timer()
 print("time needed: " + str(round(end-start,2)) + "s")
-
 
 f = []
 for (dirpath, dirnames, filenames) in walk(dir_path + "/" + folderpath):

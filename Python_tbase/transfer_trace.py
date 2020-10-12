@@ -92,10 +92,28 @@ current_edge_is_rising = not starts_with_rising_edge
 first_output_transition_str = line[endindex+3].split(",")
 
 
-# upside_output_params = [[0.0 for i in range(sig.num_args)] for j in range(num_lowside_pulses*2)]
-# lowside_output_params = [[0.0 for i in range(sig.num_args)] for j in range(num_upside_pulses*2)]
 
 final_output_params = [[0.0 for i in range(sig.num_args)]]
+
+input_parameters = [0.0 for i in range(2*sig.num_args-1)]
+argc = 0
+for j in range(0, sig.num_args):
+	if j != 1:
+		input_parameters[argc] = trace_parameters[0][j]
+	else:
+		argc+=1
+
+input_parameters[1] = 1.6
+input_parameters[sig.num_args] = 12
+output_parameters = [0.0 for i in range(sig.num_args)]
+if current_edge_is_rising:
+	for j in range(0, sig.num_args):
+		output_parameters[j] = meta_func(input_parameters, input_lowside_tr_fnc_params[j])
+else:
+	for j in range(0, sig.num_args):
+		output_parameters[j] = meta_func(input_parameters, input_upside_tr_fnc_params[j])
+output_parameters[1]+=trace_parameters[0][1]
+final_output_params[0] = output_parameters
 
 for i in range(0, sig.num_args):
 	final_output_params[0][i] = float(first_output_transition_str[i])
@@ -110,6 +128,9 @@ for i in range(1, len(trace_parameters)):
 		else:
 			argc+=1
 		input_parameters[sig.num_args+j-1] = final_output_params[i-1][j]
+
+	if T > 12:
+		T = 12
 	input_parameters[sig.num_args] = T
 	output_parameters = [0.0 for i in range(sig.num_args)]
 
@@ -133,7 +154,7 @@ for i in range(0, len(final_output_params)):
 
 
 
-
+#test = meta_func([-1.44, -1.66, 6.7], input_lowside_tr_fnc_params[1])
 
 
 
@@ -145,7 +166,7 @@ approx_out = [0.0]*len(data_reduced[0])
 
 output_fitting_error = [0.0]*len(data_reduced[0])
 for i in range(0,len(data_reduced[0])): # Calculate the fitted curves.
-	approx_out[i] = trace_sigmoids(data_reduced[0][i], output_param_array)
+	approx_out[i] = trace_sigmoids(data_reduced[0][i], output_param_array)+1.2
 	output_fitting_error[i] = approx_out[i] - data_reduced[2][i]
 # Draw a picture of the original traces and the fitted curves.	
 plt.cla()

@@ -166,7 +166,7 @@ approx_out = [0.0]*len(data_reduced[0])
 
 output_fitting_error = [0.0]*len(data_reduced[0])
 for i in range(0,len(data_reduced[0])): # Calculate the fitted curves.
-	approx_out[i] = trace_sigmoids(data_reduced[0][i], output_param_array)+1.2
+	approx_out[i] = trace_sigmoids(data_reduced[0][i], output_param_array)+1.2*0
 	output_fitting_error[i] = approx_out[i] - data_reduced[2][i]
 # Draw a picture of the original traces and the fitted curves.	
 plt.cla()
@@ -187,7 +187,7 @@ output_fitting_err = aux.calc_rms_error_func(trace_sigmoids, output_param_array,
 plt.text(0, Voltage/8, "In  RMSE: " + str(round(input_fitting_err,5)) + "\nOut RMSE: " + str(round(output_fitting_err,5)),family="monospace")
 file_name = path.split("/")[len(path.split("/"))-1]
 title = file_name[:len(file_name)-4]
-plt.title(title + " fitting using transfer functions")
+#plt.title(title + " fitting using transfer functions")
 plt.legend(["Input","Output","Output fitting from transfer functions", "fitting error"], loc = 'center left')
 imgpath = path[:len(path)-4]
 plt.ylabel("Voltage [V]")

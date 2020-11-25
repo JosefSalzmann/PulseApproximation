@@ -5,7 +5,7 @@ from timeit import default_timer as timer
 
 transitionIndex = 0
 
-folderpath = "../WaveformData/t4_d"
+folderpath = "../WaveformData/traces_for_pictures"
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 f = []

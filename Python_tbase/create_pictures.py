@@ -492,15 +492,94 @@ elif int(sys.argv[1]) == 7:
 	plt.show()
 elif int(sys.argv[1]) == 8:
 
-	path = dir_path + "/../WaveformData/t4_traces/inv_t4_d001000000_001000000_002000000.dat"
+	path = dir_path + "/../WaveformData/traces_for_pictures/inv_t4_u000740000_001220000_000730000.dat"
 	data = aux.read_file(path, 10000)
 
 	plt.cla()
 	plt.clf()
 
+
+	input_edges = [0 for i in range(4)]
+	edge_cnt = 0
+	for i in range(len(data[1])):
+		# print(i)
+		# print(data[1][i])
+		data[0][i]*=10**9
+		if data[1][i]>0.59 and data[1][i] < 0.61:
+			if (edge_cnt > 0 and input_edges[edge_cnt-1]+20 < i) or edge_cnt == 0:
+				input_edges[edge_cnt] = i
+				edge_cnt+=1
+
 	fig = plt.gcf()
-	fig.set_size_inches(8, 6)
+	fig.set_size_inches(10, 3)
 	linew = 1.5
 	plt.plot(data[0],data[1],'r-', linewidth=linew)
 	plt.plot(data[0],data[2],'g-', linewidth=linew)
+
+	arrow_size = 20
+	plt.arrow(data[0][input_edges[0]], 0.6, data[0][input_edges[1]]-data[0][input_edges[0]]-data[0][arrow_size], 0, width=0.0005, head_width=data[0][arrow_size]/2, head_length=data[0][arrow_size], fc='k', ec='k', linestyle=('-'), capstyle='round')
+	plt.arrow(data[0][input_edges[1]], 0.6, -(data[0][input_edges[1]]-data[0][input_edges[0]]-data[0][arrow_size]), 0, width=0.0005, head_width=data[0][arrow_size]/2, head_length=data[0][arrow_size], fc='k', ec='k', linestyle=('-'), capstyle='round')
+
+	plt.arrow(data[0][input_edges[1]], 0.6, data[0][input_edges[2]]-data[0][input_edges[1]]-data[0][arrow_size], 0, width=0.0005, head_width=data[0][arrow_size]/2, head_length=data[0][arrow_size], fc='k', ec='k', linestyle=('-'), capstyle='round')
+	plt.arrow(data[0][input_edges[2]], 0.6, -(data[0][input_edges[2]]-data[0][input_edges[1]]-data[0][arrow_size]), 0, width=0.0005, head_width=data[0][arrow_size]/2, head_length=data[0][arrow_size], fc='k', ec='k', linestyle=('-'), capstyle='round')
+	
+	plt.arrow(data[0][input_edges[2]], 0.6, data[0][input_edges[3]]-data[0][input_edges[2]]-data[0][arrow_size], 0, width=0.0005, head_width=data[0][arrow_size]/2, head_length=data[0][arrow_size], fc='k', ec='k', linestyle=('-'), capstyle='round')
+	plt.arrow(data[0][input_edges[3]], 0.6, -(data[0][input_edges[3]]-data[0][input_edges[2]]-data[0][arrow_size]), 0, width=0.0005, head_width=data[0][arrow_size]/2, head_length=data[0][arrow_size], fc='k', ec='k', linestyle=('-'), capstyle='round')
+	
+
+	plt.text(data[0][(input_edges[0]+input_edges[1])//2-10],0.63,r'$T_{A}$',fontsize=12)
+	plt.text(data[0][(input_edges[1]+input_edges[2])//2-10],0.63,r'$T_{B}$',fontsize=12)
+	plt.text(data[0][(input_edges[2]+input_edges[3])//2-10],0.63,r'$T_{C}$',fontsize=12)
+
+	plt.ylabel("Voltage [V]")
+	plt.xlabel("Time [ns]")
+	plt.title('')
+	plt.legend(["Input", "Output"], loc = 'center left')
+	plt.show()
+
+elif int(sys.argv[1]) == 9:
+
+	path = dir_path + "/../WaveformData/traces_for_pictures/inv_t4_u000460000_001220000_000730000.dat"
+	data = aux.read_file(path, 10000)
+
+	plt.cla()
+	plt.clf()
+
+
+	input_edges = [0 for i in range(4)]
+	edge_cnt = 0
+	for i in range(len(data[1])):
+		# print(i)
+		# print(data[1][i])
+		data[0][i]*=10**9
+		if data[1][i]>0.59 and data[1][i] < 0.61:
+			if (edge_cnt > 0 and input_edges[edge_cnt-1]+20 < i) or edge_cnt == 0:
+				input_edges[edge_cnt] = i
+				edge_cnt+=1
+
+	fig = plt.gcf()
+	fig.set_size_inches(10, 3)
+	linew = 1.5
+	plt.plot(data[0],data[1],'r-', linewidth=linew)
+	plt.plot(data[0],data[2],'g-', linewidth=linew)
+
+	arrow_size = 20
+	plt.arrow(data[0][input_edges[0]], 0.6, data[0][input_edges[1]]-data[0][input_edges[0]]-data[0][arrow_size], 0, width=0.0005, head_width=data[0][arrow_size]/2, head_length=data[0][arrow_size], fc='k', ec='k', linestyle=('-'), capstyle='round')
+	plt.arrow(data[0][input_edges[1]], 0.6, -(data[0][input_edges[1]]-data[0][input_edges[0]]-data[0][arrow_size]), 0, width=0.0005, head_width=data[0][arrow_size]/2, head_length=data[0][arrow_size], fc='k', ec='k', linestyle=('-'), capstyle='round')
+
+	plt.arrow(data[0][input_edges[1]], 0.6, data[0][input_edges[2]]-data[0][input_edges[1]]-data[0][arrow_size], 0, width=0.0005, head_width=data[0][arrow_size]/2, head_length=data[0][arrow_size], fc='k', ec='k', linestyle=('-'), capstyle='round')
+	plt.arrow(data[0][input_edges[2]], 0.6, -(data[0][input_edges[2]]-data[0][input_edges[1]]-data[0][arrow_size]), 0, width=0.0005, head_width=data[0][arrow_size]/2, head_length=data[0][arrow_size], fc='k', ec='k', linestyle=('-'), capstyle='round')
+	
+	plt.arrow(data[0][input_edges[2]], 0.6, data[0][input_edges[3]]-data[0][input_edges[2]]-data[0][arrow_size], 0, width=0.0005, head_width=data[0][arrow_size]/2, head_length=data[0][arrow_size], fc='k', ec='k', linestyle=('-'), capstyle='round')
+	plt.arrow(data[0][input_edges[3]], 0.6, -(data[0][input_edges[3]]-data[0][input_edges[2]]-data[0][arrow_size]), 0, width=0.0005, head_width=data[0][arrow_size]/2, head_length=data[0][arrow_size], fc='k', ec='k', linestyle=('-'), capstyle='round')
+	
+
+	plt.text(data[0][(input_edges[0]+input_edges[1])//2-35],0.63,r'$T_{A}$',fontsize=12)
+	plt.text(data[0][(input_edges[1]+input_edges[2])//2-10],0.63,r'$T_{B}$',fontsize=12)
+	plt.text(data[0][(input_edges[2]+input_edges[3])//2-10],0.63,r'$T_{C}$',fontsize=12)
+
+	plt.ylabel("Voltage [V]")
+	plt.xlabel("Time [ns]")
+	plt.title('')
+	plt.legend(["Input", "Output"], loc = 'center left')
 	plt.show()

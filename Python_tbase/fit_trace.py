@@ -13,7 +13,7 @@ def main(path, sig_name, Voltage, generatePicture):
 		correction = 0
 		if args[0] < 0 and (len(args)/sig.num_args)%2 == 0: # first edge is falling
 			correction = 1
-		return (len(args)/sig.num_args)/2-correction
+		return (len(args)/sig.num_args)//2-correction
 		
 		
 	def trace_sigmoids(t, args): # Function of the whole trace. The number of sigmoids depends on the length of args. After evaluation the resulting value is compensated by the number of terms needed.
@@ -42,7 +42,7 @@ def main(path, sig_name, Voltage, generatePicture):
 			starts_at_Vdd = 1
 			next_edge_rising = False
 		switching_points = []
-		min_height = 0.0005
+		min_height = 0.05
 		for i in range(0, len(trace)-filter_size): # Iterate through the derivative array and identify small portions (size of the filter) where the gradient is constant and not zero.
 			filter = first_der[i:i+filter_size]
 			if (np.sum(filter) > min_height*filter_size and next_edge_rising) or (np.sum(filter) < -1*min_height*filter_size and not next_edge_rising): # Check if the observed portion is not zero.
@@ -61,6 +61,9 @@ def main(path, sig_name, Voltage, generatePicture):
 					if all_in_range: # A turning point is found.
 						next_edge_rising = not next_edge_rising # The next turning point has to have the opposite direction. 
 						switching_points.append(i+filter_size) # The current position is noted and will be used as inital guess for the fitting algorithm.
+		
+		# if len(switching_points) == 0: !!!!!!
+		# 	return 
 
 		trace_init = [0.0]*(sig.num_args*len(switching_points)) # Array with the initial guess of the parameters of the single simgoids.
 		for i in range(0,len(switching_points)):
@@ -85,7 +88,7 @@ def main(path, sig_name, Voltage, generatePicture):
 					
 		for i in range(0,len(switching_points)-1): # The bounds of the shift parameters will depend on the identified turning points and are set in between the middle of two turning points.
 			lower_bound[sig.num_args*(i+1)+1] = 0.75*(trace_init[sig.num_args*i+1]+trace_init[sig.num_args*(i+1)+1])/2
-			upper_bound[sig.num_args*i+1] = 1.25*(trace_init[sig.num_args*i+1]+trace_init[sig.num_args*(i+1)+1])/2
+			upper_bound[sig.num_args*i+1] = 1.25*(trace_init[sig.num_args*i+1]+trace_init[sig.num_args*(i+1)+1])/2		
 		lower_bound[1] = 0
 		upper_bound[len(trace_init)-sig.num_args+1] = time[len(time)-1]*10**10
 		# The fitting process will be performed with the lowres trace since we don't need all the details of the curve for an acceptable fitting.
@@ -140,7 +143,7 @@ def main(path, sig_name, Voltage, generatePicture):
 		plt.ylabel("Voltage [V]")
 		plt.xlabel("Time [s]")
 		plt.savefig(imgpath + "_fitting.svg")
-		#plt.show()
+		# plt.show()
 
 
 

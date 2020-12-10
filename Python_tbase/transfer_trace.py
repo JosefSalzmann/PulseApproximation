@@ -185,10 +185,11 @@ input_fitting_err = 0.0 #aux.calc_rms_error_func(trace_sigmoids, input_fitting[0
 output_fitting_err = aux.calc_rms_error_func(trace_sigmoids, output_param_array, data_reduced[0], data_reduced[2])/Voltage
 
 plt.text(0, Voltage/8, "In  RMSE: " + str(round(input_fitting_err,5)) + "\nOut RMSE: " + str(round(output_fitting_err,5)),family="monospace")
+# plt.text(0, Voltage/8, "Out RMSE: " + str(round(output_fitting_err,5)),family="monospace")
 file_name = path.split("/")[len(path.split("/"))-1]
 title = file_name[:len(file_name)-4]
 #plt.title(title + " fitting using transfer functions")
-plt.legend(["Input","Output","Output fitting from transfer functions", "fitting error"], loc = 'center left')
+plt.legend(["Input","Output","Output fitting from transfer functions", "fitting error"], loc = 'lower left')
 imgpath = path[:len(path)-4]
 plt.ylabel("Voltage [V]")
 plt.xlabel("Time [s]")

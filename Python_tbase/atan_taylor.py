@@ -9,11 +9,27 @@ tan_taylor_coeffs_odd = [	1.000000000000000, 0.333333333333333, 0.13333333333333
 						0.053968253968254, 0.021869488536155, 0.008863235529902,
 						0.003592128036572, 0.001455834387051, 0.000590027440946 ]
 
+
+def m(x):
+	if isinstance(x, float) or isinstance(x, int):
+		if x < 0:
+			return 0
+		elif x > 1:
+			return 1
+		else:
+			return x
+	for i in range(len(x)):
+		if x[i] < 0:
+			x[i] = 0
+		elif x[i] > 1:
+			x[i] = 1
+	return x
+
 def taylor_approx(x,a):
 	sum = x	
 	if a < len(tan_taylor_coeffs_odd):
 		for i in range(1,len(tan_taylor_coeffs_odd)):
-			sum = sum + (tan_taylor_coeffs_odd[i]*x**(2*i+1))*((np.arctan(taylor_approx(1*(a-i),50))/np.pi)+0.5)     
+			sum = sum + (tan_taylor_coeffs_odd[i]*x**(2*i+1))*m(a+1-i)#((np.arctan(taylor_approx(1*(a-i),50))/np.pi)+0.5)     
 	else:
 		for i in range(1,len(tan_taylor_coeffs_odd)):
 			sum = sum + tan_taylor_coeffs_odd[i]*x**(2*i+1)	
@@ -44,11 +60,11 @@ parameter_names = ['steepness', 'shift', 'curvature_left', 'curvature_right']
 
 rising_initial = [0.8, 11.3, 1.5, 1.5]
 rising_lower_bound = [0.3 ,0, 0.1, 0.1]
-rising_upper_bound = [1.2, 27, 2, 4]
+rising_upper_bound = [1.2, 27, 5, 5]
 
 falling_initial = [-0.8, 11.3, 1.5, 1.5]
 falling_lower_bound = [-2, 0, 0.1, 0.1]
-falling_upper_bound = [-0.3, 27, 4, 4]
+falling_upper_bound = [-0.3, 27, 5, 5]
 
 default_pulse_length = 1.0
 

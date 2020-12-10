@@ -8,8 +8,11 @@ from timeit import default_timer as timer
 import sys
 from scipy.special import gamma, factorial
 import exp as exp
+import atan_taylor as atan_taylor
 import importlib
 import os
+import math
+from matplotlib.patches import Ellipse
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -17,8 +20,31 @@ sig = importlib.import_module("atan_taylor", package=None)
 
 tan_taylor_coeffs_odd = [	1.000000000000000, 0.333333333333333, 0.133333333333333, 
 						0.053968253968254, 0.021869488536155, 0.008863235529902,
-						0.003592128036572, 0.001455834387051, 0.000590027440946 ]
-                       
+						0.003592128036572, 0.001455834387051, 0.000590027440946,
+						0.000239129114244, 0.000096915379569, 0.000039278323883,
+						0.000015918905069, 0.000006451689216, 0.000002614771151,
+						0.000001059726832, 0.000000429491108, 0.000000174066190,
+						0.000000070546369, 0.000000028591367, 0.000000011587644 ]
+                    
+
+
+
+
+
+def S(x):
+	if x <= -1:
+		return -1
+	elif x > -1 and x <= 1:
+		return x
+	else:
+		return 1 
+
+def numerical_derivative(x,y):
+	dy = [0.0]*(len(y)-1)
+	for i in range(len(y)-1):
+		dy[i] = (y[i+1]-y[i])/(x[i+1]-x[i])
+	return dy
+
 def taylor_approx_simple(x,a):
 	sum = x
 	for i in range(1,min(a+1,len(tan_taylor_coeffs_odd))):
@@ -29,19 +55,33 @@ def sigmoid_simple(t, args):
 	return np.arctan(taylor_approx_simple(args[0]*(t*10**10-args[1]), args[2]))
 	
 	
+def m(x):
+	if isinstance(x, float) or isinstance(x, int):
+		if x < 0:
+			return 0
+		elif x > 1:
+			return 1
+		else:
+			return x
+	for i in range(len(x)):
+		if x[i] < 0:
+			x[i] = 0
+		elif x[i] > 1:
+			x[i] = 1
+	return x
+
 def taylor_approx(x,a):
-	sum = x
+	sum = x	
 	if a < len(tan_taylor_coeffs_odd):
 		for i in range(1,len(tan_taylor_coeffs_odd)):
-			sum = sum + (tan_taylor_coeffs_odd[i]*x**(2*i+1))*((np.arctan(taylor_approx(a-i,50))/np.pi)+0.5)
+			sum = sum + (tan_taylor_coeffs_odd[i]*x**(2*i+1))*m(a+1-i)#((np.arctan(taylor_approx(1*(a-i),50))/np.pi)+0.5)     
 	else:
 		for i in range(1,len(tan_taylor_coeffs_odd)):
-			sum = sum + tan_taylor_coeffs_odd[i]*x**(2*i+1)
+			sum = sum + tan_taylor_coeffs_odd[i]*x**(2*i+1)	
 	return sum	
 
 def sigmoid(t, args):
 	return np.arctan(taylor_approx(args[0]*(t*10**10-args[1]), args[2]))
-	
 	
 def taylor_approx_straight(x,a): #implementation with sharp edges (easier but results in worse fittings)
 	sum = 0
@@ -61,7 +101,7 @@ def taylor_approx_straight(x,a): #implementation with sharp edges (easier but re
 	return sum
 
 def sigmoid_straight(t, args):
-	return np.arctan(taylor_approx_straight(args[0]*(t*10**10-args[1]), args[2]))
+	return np.arctan(taylor_approx(args[0]*(t*10**10-args[1]), args[2]))
 	
 	
 def taylor_approx_der(t,a):
@@ -78,7 +118,6 @@ def taylor_approx_der(t,a):
 			sum = sum + new_part*(np.heaviside(t,0)*2-1)
 			#print("t: " + str(t) + ", " + str(new_part*(np.heaviside(t,0)*2-1)))#str((np.heaviside(t,0.5)*2-1)))
 	return sum
-
 
 def sigmoid_frac_der(t, args):
 	return (0.5*np.arctan(taylor_approx_der(args[0]*(t*10**10-args[1]), args[2]))/(np.pi/2)+0.5)*((np.arctan(10000*args[0]*(t*10**10-args[1]))/np.pi)+0.5)+(0.5*np.arctan(taylor_approx_der(args[0]*(t*10**10-args[1]), args[3]))/(np.pi/2)+0.5)*((np.arctan(-10000*args[0]*(t*10**10-args[1]))/np.pi)+0.5)		  	
@@ -102,7 +141,7 @@ def compensation_terms(args): # Calculates the number compensation terms needed 
 	correction = 0
 	if args[0] < 0 and (len(args)/exp.num_args)%2 == 0: # first edge is falling
 		correction = 1
-	return (len(args)/exp.num_args)/2-correction
+	return (len(args)/exp.num_args)//2-correction
 	
 	
 def trace_sigmoids_exp(t, args): # Function of the whole trace. The number of sigmoids depends on the length of args. After evaluation the resulting value is compensated by the number of terms needed.
@@ -110,6 +149,19 @@ def trace_sigmoids_exp(t, args): # Function of the whole trace. The number of si
 	for i in range(0,len(args)//(exp.num_args)):
 		sum = sum + exp.sigmoid(t,args[exp.num_args*i:exp.num_args*(i+1)])
 	return Voltage*(sum-compensation_terms(args))
+
+
+def compensation_terms_atan_taylor(args): # Calculates the number compensation terms needed (multiples of Vdd) such that the resulting trace is always between 0 and Vdd.
+	correction = 0
+	if args[0] < 0 and (len(args)/atan_taylor.num_args)%2 == 0: # first edge is falling
+		correction = 1
+	return (len(args)/atan_taylor.num_args)//2-correction
+
+def trace_sigmoids_atan_taylor(t, args): # Function of the whole trace. The number of sigmoids depends on the length of args. After evaluation the resulting value is compensated by the number of terms needed.
+	sum = 0
+	for i in range(0,len(args)//(atan_taylor.num_args)):
+		sum = sum + atan_taylor.sigmoid(t,args[atan_taylor.num_args*i:atan_taylor.num_args*(i+1)])
+	return Voltage*(sum-compensation_terms_atan_taylor(args))
 
 Voltage = 1.2
 max_x = 10
@@ -125,24 +177,20 @@ for i in range(0,length):
 	
 	
 if int(sys.argv[1]) == 0:
-	straight = [0.0]*length
 	atan_zero = [0.0]*length
 	atan_one = [0.0]*length
 	atan_two = [0.0]*length
+	atan_five = [0.0]*length
 	atan_ten = [0.0]*length
-
+	atan_twenty = [0.0]*length
 
 	for i in range(0,length):
-		if(x[i] < -np.pi/2):
-			straight[i] = -np.pi/2
-		elif(x[i] > np.pi/2):
-			straight[i] = np.pi/2
-		else:
-			straight[i] = x[i]
 		atan_zero[i] = sigmoid_simple(x[i]/10**10, [1,0,0])	
 		atan_one[i] = sigmoid_simple(x[i]/10**10, [1,0,1])
 		atan_two[i] = sigmoid_simple(x[i]/10**10, [1,0,2])
-		atan_ten[i] = sigmoid_simple(x[i]/10**10, [1,0,5])
+		atan_five[i] = sigmoid_simple(x[i]/10**10, [1,0,5])
+		atan_ten[i] = sigmoid_simple(x[i]/10**10, [1,0,10])
+		atan_twenty[i] = sigmoid_simple(x[i]/10**10, [1,0,20])
 
 	plt.cla()
 	plt.clf()
@@ -150,24 +198,24 @@ if int(sys.argv[1]) == 0:
 	fig.set_size_inches(8, 6)
 
 		
-	linew = 1
+	linew = 1.5
 		
 	
-	plt.plot(x,atan_zero,'r-', linewidth=linew)
-	plt.plot(x,atan_one,'g-', linewidth=linew)
-	plt.plot(x,atan_two,'b-', linewidth=linew)
-	plt.plot(x,atan_ten,'y-', linewidth=linew)
-	plt.plot(x,straight,'c-', linewidth=linew)
+	plt.plot(x,atan_zero, linewidth=linew)
+	plt.plot(x,atan_one, linewidth=linew)
+	plt.plot(x,atan_two, linewidth=linew)
+	plt.plot(x,atan_five, linewidth=linew)
+	plt.plot(x,atan_ten, linewidth=linew)
+	plt.plot(x,atan_twenty, linewidth=linew)
 
 	plt.title('')
-	plt.legend(["c = 0 (equal to atan(x))","c = 1", "c = 2", "c = 5", "s(x)"], loc = 'center left')
+	plt.legend(["c = 0 (equal to atan(x))","c = 1", "c = 2", "c = 5", "c = 10", "c = 20"], loc = 'center left')
 	#plt.text(-10, 1, "text")
 	plt.show()
 elif int(sys.argv[1]) == 1:
 
-	#for i in range(0,length):
-	#	x[i] = i*(1.0*max_x/length)
-
+	x_max = 10
+	x = np.linspace(0,x_max, length)
 
 	atan_zero = [0.0]*length
 	atan_1 = [0.0]*length
@@ -177,11 +225,11 @@ elif int(sys.argv[1]) == 1:
 	atan_5 = [0.0]*length
 
 	for i in range(0,length):
-		atan_zero[i] = sigmoid_frac_der(x[i]/10**10, [1,0,1,1])	
-		atan_1[i] = sigmoid_frac_der(x[i]/10**10, [1,0,1.1,2])
-		atan_2[i] = sigmoid_frac_der(x[i]/10**10,  [1,0,1.2,3])
-		#atan_3[i] = sigmoid(x[i]/10**10, [1,0,1])
-		#atan_4[i] = sigmoid(x[i]/10**10, [1,0,0.8])
+		atan_zero[i] = sigmoid(x[i]/10**10, [1,0,0])	
+		atan_1[i] = sigmoid(x[i]/10**10, [1,0,0.1])
+		atan_2[i] = sigmoid(x[i]/10**10,  [1,0,0.5])
+		atan_3[i] = sigmoid(x[i]/10**10,  [1,0,1])
+		# atan_4[i] = sigmoid(x[i]/10**10,  [1,0,0.3])
 		#atan_5[i] = sigmoid(x[i]/10**10, [1,0,1])
 
 	plt.cla()
@@ -190,17 +238,17 @@ elif int(sys.argv[1]) == 1:
 	fig.set_size_inches(8, 6)
 
 		
-	linew = 1
+	linew = 1.5
 		
-	plt.plot(x,atan_zero,'r-', linewidth=linew)
-	plt.plot(x,atan_1,'g-', linewidth=linew)
-	plt.plot(x,atan_2,'b-', linewidth=linew)
-	#plt.plot(x,atan_3,'y-', linewidth=linew)
-	#plt.plot(x,atan_4,'c-', linewidth=linew)
+	plt.plot(x,atan_zero, linewidth=linew)
+	plt.plot(x,atan_1, linewidth=linew)
+	plt.plot(x,atan_2, linewidth=linew)
+	plt.plot(x,atan_3, linewidth=linew)
+	# plt.plot(x,atan_4, linewidth=linew)
 	#plt.plot(x,atan_5,'m-', linewidth=linew)
 
 	plt.title('')
-	plt.legend(["first","second", "third", "c = 1"], loc = 'center right')
+	plt.legend(["c = 0","c = 0.1", "c = 0.5", "c = 1"], loc = 'center right')
 	#plt.text(-10, 1, "text")
 	plt.show() 
 
@@ -211,7 +259,7 @@ elif int(sys.argv[1]) == 2:
 
 	for i in range(0,length):
 		atan_zero_zero[i] = np.pi*sig.sigmoid(x[i]/10**10, [1,0,0, 0])-np.pi/2
-		atan_pfive_five[i] = np.pi*sig.sigmoid(x[i]/10**10, [1,0,0.5, 5])-np.pi/2
+		atan_pfive_five[i] = np.pi*sig.sigmoid(x[i]/10**10, [1,0,0.1, 5])-np.pi/2
 
 	plt.cla()
 	plt.clf()
@@ -219,15 +267,15 @@ elif int(sys.argv[1]) == 2:
 	fig.set_size_inches(8, 6)
 
 		
-	linew = 1
+	linew = 1.5
 		
-	plt.plot(x,atan_zero_zero,'r-', linewidth=linew)
-	plt.plot(x,atan_pfive_five,'g-', linewidth=linew)
+	plt.plot(x,atan_zero_zero, linewidth=linew)
+	plt.plot(x,atan_pfive_five, linewidth=linew)
 	#plt.plot(x,atan_two,'b-', linewidth=linew)
 	#plt.plot(x,atan_ten,'y-', linewidth=linew)
 
 	plt.title('')
-	plt.legend(["c = 0, d = 0","c = 5, d = 0.5"], loc = 'center left')
+	plt.legend(["c = 0, d = 0","c = 5, d = 0.1"], loc = 'center left')
 	#plt.text(-10, 1, "text")
 	plt.show()
 elif int(sys.argv[1]) == 3:
@@ -340,7 +388,7 @@ elif int(sys.argv[1]) == 4:
 	plt.ylabel("Voltage [V]")
 	plt.xlabel("Time [s]")
 	plt.title('')
-	plt.legend(["Input","Initial Guess"], loc = 'center left')
+	plt.legend(["Physical Trace","Initial Guess"], loc = 'center left')
 	plt.show()
 
 elif int(sys.argv[1]) == 5:
@@ -582,4 +630,359 @@ elif int(sys.argv[1]) == 9:
 	plt.xlabel("Time [ns]")
 	plt.title('')
 	plt.legend(["Input", "Output"], loc = 'center left')
+	plt.show()
+elif int(sys.argv[1]) == 10:
+
+	path = dir_path + "/../WaveformData/t4_d/inv_t4_d000500000Traces.dat"
+	data = aux.read_file(path, 10000)
+
+	plt.cla()
+	plt.clf()
+
+	first_params = [1.16094, 13.21017]
+	second_params = [-1.28307, 14.98119]
+	all_params = [first_params[0], first_params[1], second_params[0], second_params[1]]
+	first_edge = [trace_sigmoids_exp(data[0][i], first_params) for i in range(len(data[0]))]
+	second_edge = [trace_sigmoids_exp(data[0][i], second_params) for i in range(len(data[0]))]
+	both_edges = [trace_sigmoids_exp(data[0][i], all_params) for i in range(len(data[0]))]
+
+	fig = plt.gcf()
+	fig.set_size_inches(10, 3)
+	linew = 1.5
+	plt.plot(data[0],data[2],'g-', linewidth=linew)
+	plt.plot(data[0],first_edge,'r-', linewidth=linew)
+	plt.plot(data[0],second_edge,'b-', linewidth=linew)
+	plt.plot(data[0],both_edges,'g--', linewidth=linew)
+
+
+	plt.ylabel("Voltage [V]")
+	plt.xlabel("Time [s]")
+	plt.title('')
+	plt.legend(["Physical Trace", "Rising Edge Approximation", "Falling Edge Approximation", "Sum of Edges"], loc = 'center left')
+	plt.show()
+
+elif int(sys.argv[1]) == 11:
+
+
+	# Input parameters
+	# steepness,shift
+	# 1.17713,10.59539
+	# -1.28775,12.25776
+	# Input compensations terms,1.0
+	# Output parameters
+	# steepness,shift
+	# ..\\WaveformData\\inv_t4_u000406000Traces.dat
+
+	path = dir_path + "/../WaveformData/inv_t4_u000406000Traces.dat"
+	data = aux.read_file(path, 10000)
+
+	plt.cla()
+	plt.clf()
+
+	first_params = [1.17713, 10.59539]
+	second_params = [-1.28775, 12.25776]
+	all_params = [first_params[0], first_params[1], second_params[0], second_params[1]]
+	first_edge = [trace_sigmoids_exp(data[0][i], first_params) for i in range(len(data[0]))]
+	second_edge = [trace_sigmoids_exp(data[0][i], second_params) for i in range(len(data[0]))]
+	both_edges = [trace_sigmoids_exp(data[0][i], all_params) for i in range(len(data[0]))]
+
+	output_fitting_err = aux.calc_rms_error_func(trace_sigmoids_exp, all_params, data[0], data[1])/Voltage
+
+	fig = plt.gcf()
+	fig.set_size_inches(10, 3)
+	linew = 1.5
+	plt.plot(data[0],data[1],'g-', linewidth=linew)
+	plt.plot(data[0],first_edge,'r-', linewidth=linew)
+	plt.plot(data[0],second_edge,'b-', linewidth=linew)
+	plt.plot(data[0],both_edges,'g--', linewidth=linew)
+	plt.text(0, Voltage/8, "Fitting Error: " + str(round(output_fitting_err,5)),family="monospace")
+
+	plt.ylabel("Voltage [V]")
+	plt.xlabel("Time [s]")
+	plt.title('')
+	plt.legend(["Physical Trace", "Rising Edge Approximation", "Falling Edge Approximation", "Sum of Edges"], loc = 'center left')
+	plt.show()
+elif int(sys.argv[1]) == 12:
+
+	path = dir_path + "/../WaveformData/inv_t4_u000406000Traces.dat"
+	data = aux.read_file(path, 10000)
+
+	plt.cla()
+	plt.clf()
+
+
+
+	fig = plt.gcf()
+	fig.set_size_inches(10, 3)
+	linew = 1.5
+	plt.plot(data[0],data[1],'g-', linewidth=linew)
+
+
+	plt.ylabel("Voltage [V]")
+	plt.xlabel("Time [s]")
+	plt.title('')
+	plt.legend(["Physical Trace"], loc = 'center left')
+	plt.show()
+elif int(sys.argv[1]) == 13:
+
+	path = dir_path + "/../WaveformData/t4_traces/inv_t4_invSim_Traces.dat"
+	data = aux.read_file(path, 10000)
+
+
+	first_der = [0.0]*len(data[0]) 
+	for i in range(1,len(first_der)): # Calculate the first derivative of the given trace in order to find the turning points of the trace so that the number of sigmoids and their initial position can be determined.
+		if (data[0][i]-data[0][i-1]) != 0:
+			first_der[i] = (data[1][i]-data[1][i-1])/(data[0][i]-data[0][i-1])*10**-9*0.2
+		else: # dat-files sometimes contain the same time stamp twice...
+			first_der[i] = first_der[i-1] # in that case the derivative is just interpolated using the previous value.
+
+	filter_size = 10
+	percent_in_range = 0.01
+	filter = [0.0]*filter_size
+	starts_at_Vdd = 0
+	next_edge_rising = True
+	if data[1][0] > Voltage/2: # Identify if the trace starts with a falling or a rising edge.
+		starts_at_Vdd = 1
+		next_edge_rising = False
+	switching_points = []
+	min_height = 0.05
+	for i in range(0, len(data[1])-filter_size): # Iterate through the derivative array and identify small portions (size of the filter) where the gradient is constant and not zero.
+		filter = first_der[i:i+filter_size]
+		if (np.sum(filter) > min_height*filter_size and next_edge_rising) or (np.sum(filter) < -1*min_height*filter_size and not next_edge_rising): # Check if the observed portion is not zero.
+			all_same_sign = True			
+			for j in range(1,filter_size): # Check if all items in the observed part of the array have the same sign.
+				if filter[j]*filter[0] < 0:
+					all_same_sign = False
+					break
+			if all_same_sign:
+				all_in_range = True
+				abs_filter = np.absolute(filter)
+				for j in range(1,filter_size):
+					if abs_filter[j] < abs_filter[0]*(1-percent_in_range) or abs_filter[j] > abs_filter[0]*(1+percent_in_range): # Check if all items are close enough to each other.
+						all_in_range = False
+						break
+				if all_in_range: # A turning point is found.
+					next_edge_rising = not next_edge_rising # The next turning point has to have the opposite direction. 
+					switching_points.append(i+filter_size) # The current position is noted and will be used as inital guess for the fitting algorithm.
+
+	plt.cla()
+	plt.clf()
+
+
+
+	fig = plt.gcf()
+	fig.set_size_inches(16, 4)
+
+	linew = 1.5
+	plt.plot(data[0],data[1],'r-', linewidth=linew)
+
+	for i in range(len(switching_points)):
+		point = switching_points[i]+filter_size//2
+		# point2 = switching_points[i+1]+filter_size//2
+		d = 0.15
+		plt.plot([data[0][point],data[0][point]],[data[1][point]-d, data[1][point]+d],'k-', linewidth=linew)
+		# print(round((data[0][point]+data[0][point2])*0.5*10**10,3))
+
+
+
+	plt.ylabel("Voltage [V]")
+	plt.xlabel("Time [s]")
+	plt.title('')
+	plt.legend(["Physical Trace"], loc = 'center left')
+	plt.show()
+elif int(sys.argv[1]) == 14:
+
+	path = dir_path + "/../WaveformData/t4_traces/inv_t4_invSim_Traces.dat"
+	data = aux.read_file(path, 10000)
+
+	params = [1.31162, 17.67323, -1.44738, 23.27652, 1.21693, 27.88467, 
+			 -1.28902, 33.93985, 1.1308, 35.06268, -1.65124, 42.98049, 
+			  1.28576, 48.70933, -1.47807, 53.81109, 1.25413, 58.91224, 
+			  -1.31241, 63.79841, 1.18278, 68.09467, -1.63224, 75.03277]
+
+	
+	trace_fitting = [trace_sigmoids_exp(data[0][i], params) for i in range(len(data[0]))]
+	error = [trace_fitting[i]-data[1][i] for i in range(len(data[0]))]
+
+	output_fitting_err = aux.calc_rms_error_func(trace_sigmoids_exp, params, data[0], data[1])/Voltage
+
+
+	plt.cla()
+	plt.clf()
+	fig = plt.gcf()
+	fig.set_size_inches(16, 4)
+
+	linew = 1.5
+	plt.plot(data[0],data[1],'r-', linewidth=linew)
+	plt.plot(data[0],trace_fitting,'r--', linewidth=linew)
+	plt.plot(data[0],error,'k-', linewidth=linew)
+
+	plt.ylabel("Voltage [V]")
+	plt.xlabel("Time [s]")
+	plt.title('')
+	plt.text(0, Voltage/8, "Fitting  RMSE: " + str(round(0.0109022,5)),family="monospace")
+	plt.legend(["Physical Trace", "Fitting", "Error"], loc = 'center left')
+	plt.show()
+
+elif int(sys.argv[1]) == 15:
+
+	x_max = 3.5
+
+	n = 2000
+
+	x = np.linspace(-x_max, x_max, n)
+
+	atan = [(2/np.pi)*np.arctan((np.pi/2)*x[i]) for i in range(n)]
+	erf = [math.erf((np.sqrt(np.pi)/2)*x[i]) for i in range(n)]
+	xsqrt = [x[i]/np.sqrt(1+x[i]**2) for i in range(n)]
+	tanh = [np.tanh(x[i]) for i in range(n)]
+	xabs = [x[i]/(1+np.abs(x[i])) for i in range(n)]
+	sx = [S(x[i]) for i in range(n)]
+
+	plt.cla()
+	plt.clf()
+	fig = plt.gcf()
+	fig.set_size_inches(8, 4)
+
+	linew = 1.5
+	plt.plot(x,atan, linewidth=linew, label=r'$\frac{2}{\pi} arctan(\frac{\pi}{2}x)$')
+	plt.plot(x,erf, linewidth=linew, label=r'$erf(\frac{\sqrt{\pi}}{2} x)$')
+	plt.plot(x,xsqrt, linewidth=linew, label=r'$\frac{x}{\sqrt{1+x^2}}$')
+	plt.plot(x,tanh, linewidth=linew, label=r'$tanh(x)$')
+	plt.plot(x,xabs, linewidth=linew, label=r'$\frac{x}{1+|x|}$')
+	plt.plot(x,sx, linewidth=linew, label=r'$S(x)$')
+	# plt.plot([-x_max,x_max],[1,1], 'k-', linewidth=linew/2)
+	# plt.plot([-x_max,x_max],[-1,-1], 'k-', linewidth=linew/2)
+	# plt.plot([-x_max,x_max],[0,0], 'k-', linewidth=linew/2)
+	# plt.plot([0,0],[1,-1], 'k-', linewidth=linew/2)
+
+	plt.title('')
+	# plt.text(0, Voltage/8, "Fitting  RMSE: " + str(round(0.0109022,5)),family="monospace")
+	plt.legend(loc = 'upper left')
+	plt.show()
+
+elif int(sys.argv[1]) == 16:
+
+	path = dir_path + "/../WaveformData/t4_u/inv_t4_u000439300Traces.dat"
+	data = aux.read_file(path, 10000)
+	first_params = [1.17298, 10.3973]
+	second_params = [-1.29483, 13.58285]
+	all_params = [first_params[0], first_params[1], second_params[0], second_params[1]]
+	both_edges = [trace_sigmoids_exp(data[0][i], all_params) for i in range(len(data[0]))]
+	
+	error = [both_edges[i]-data[1][i] for i in range(len(data[0]))]
+
+	plt.figure()
+	fig = plt.gcf()
+	ax = plt.gca()
+	fig.set_size_inches(10, 3)
+
+
+	ax = plt.gca()
+
+	ellipse1 = Ellipse(xy=(8*10**-10, 0.038), width=10**-9/6.5, height=1/5, 
+							edgecolor='r', fc='None', lw=0.6)
+	ellipse2 = Ellipse(xy=(1.195*10**-9, 0.884), width=10**-9/6.5, height=1/5, 
+							edgecolor='r', fc='None', lw=0.6)
+	ax.add_patch(ellipse1)
+	ax.add_patch(ellipse2)
+	
+	linew = 1.5
+
+	plt.plot(data[0],data[1],'g-', linewidth=linew)
+	plt.plot(data[0],both_edges,'g--', linewidth=linew)
+	plt.plot(data[0],error,'k-', linewidth=linew)
+
+	plt.ylabel("Voltage [V]")
+	plt.xlabel("Time [s]")
+	plt.title('')
+	plt.legend(["Physical Trace", "Fitting", "Error"], loc = 'center left')
+	plt.show()
+elif int(sys.argv[1]) == 17:
+	x_max = 3
+	length = 10000
+	x = np.linspace(-x_max, x_max, length)
+	atan_zero = [0.0]*length
+	atan_one = [0.0]*length
+	atan_two = [0.0]*length
+	atan_five = [0.0]*length
+	atan_ten = [0.0]*length
+	atan_twenty = [0.0]*length
+
+	for i in range(0,length):
+		atan_zero[i] = sigmoid_simple(x[i]/10**10, [1,0,0])	
+		atan_one[i] = sigmoid_simple(x[i]/10**10, [1,0,1])
+		atan_two[i] = sigmoid_simple(x[i]/10**10, [1,0,2])
+		atan_five[i] = sigmoid_simple(x[i]/10**10, [1,0,5])
+		atan_ten[i] = sigmoid_simple(x[i]/10**10, [1,0,10])
+		atan_twenty[i] = sigmoid_simple(x[i]/10**10, [1,0,20])
+	
+	atan_zero_first_der = numerical_derivative(x,atan_zero)
+	atan_zero_second_der = numerical_derivative(x,atan_zero_first_der)
+
+	atan_one_first_der = numerical_derivative(x,atan_one)
+	atan_one_second_der = numerical_derivative(x,atan_one_first_der)
+
+	atan_two_first_der = numerical_derivative(x,atan_two)
+	atan_two_second_der = numerical_derivative(x,atan_two_first_der)
+
+	atan_five_first_der = numerical_derivative(x,atan_five)
+	atan_five_second_der = numerical_derivative(x,atan_five_first_der)
+
+	atan_ten_first_der = numerical_derivative(x,atan_ten)
+	atan_ten_second_der = numerical_derivative(x,atan_ten_first_der)
+
+	atan_twenty_first_der = numerical_derivative(x,atan_twenty)
+	atan_twenty_second_der = numerical_derivative(x,atan_twenty_first_der)
+
+	plt.cla()
+	plt.clf()
+	fig = plt.gcf()
+	fig.set_size_inches(8, 6)
+	
+	linew = 1.5
+	
+	plt.plot(x[0:len(x)-2],atan_zero_second_der, linewidth=linew)
+	plt.plot(x[0:len(x)-2],atan_one_second_der, linewidth=linew)
+	plt.plot(x[0:len(x)-2],atan_two_second_der, linewidth=linew)
+	plt.plot(x[0:len(x)-2],atan_five_second_der, linewidth=linew)
+	plt.plot(x[0:len(x)-2],atan_ten_second_der, linewidth=linew)
+	plt.plot(x[0:len(x)-2],atan_twenty_second_der, linewidth=linew)
+
+	plt.title('')
+	plt.legend(["c = 0", "c = 1", "c = 2", "c = 5", "c = 10", "c = 20"], loc = 'upper left')
+	#plt.text(-10, 1, "text")
+	plt.show()
+elif int(sys.argv[1]) == 18:
+
+	path = dir_path + "/../WaveformData/t4_u_4t/inv_t4_u000460000_000500000_000670000.dat"
+	data = aux.read_file(path, 10000)
+
+	params = [0.8762, 9.69088, 0.44981, 3.62494,
+			 -0.99391, 13.80773, 0.91518, 1.09903,
+			 0.87097, 18.83031, 1.09763, 3.0,
+			-1.0901, 26.03614, 2.5833, 1.71901]	
+
+	
+	trace_fitting = [trace_sigmoids_atan_taylor(data[0][i], params) for i in range(len(data[0]))]
+	error = [trace_fitting[i]-data[1][i] for i in range(len(data[0]))]
+
+	output_fitting_err = aux.calc_rms_error_func(trace_sigmoids_atan_taylor, params, data[0], data[1])/Voltage
+
+
+	plt.cla()
+	plt.clf()
+	fig = plt.gcf()
+	fig.set_size_inches(16, 4)
+
+	linew = 1.5
+	plt.plot(data[0][0:int((len(data[0])*(3.5/5)))],data[1][0:int((len(data[0])*(3.5/5)))],'r-', linewidth=linew)
+	plt.plot(data[0][0:int((len(data[0])*(3.5/5)))],trace_fitting[0:int((len(data[0])*(3.5/5)))],'r--', linewidth=linew)
+	plt.plot(data[0][0:int((len(data[0])*(3.5/5)))],error[0:int((len(data[0])*(3.5/5)))],'k-', linewidth=linew)
+
+	plt.ylabel("Voltage [V]")
+	plt.xlabel("Time [s]")
+	plt.title('')
+	plt.text(0, Voltage/8, "Fitting  RMSE: " + str(round(output_fitting_err,5)),family="monospace")
+	plt.legend(["Physical Trace", "Fitting", "Error"], loc = 'center left')
 	plt.show()
